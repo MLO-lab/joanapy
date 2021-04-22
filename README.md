@@ -1,2 +1,2 @@
 # joanapy
-Joint continuous multi-level Ontology enrichment ANAlysis.
+Joint continuous multi-level Ontology enrichment ANAlysis (JOANA).
