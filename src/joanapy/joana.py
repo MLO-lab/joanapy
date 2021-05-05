@@ -29,6 +29,9 @@ class JOANA:
 
     def run(self, filename_output, filename_moment_fit_first=None, filename_moment_fit_second=None, tolerance_fitting=1E-5, steps_fitting=30000, verbose=True, goodness_of_fit=False, plot_components=False, prior_pA=1, min_term_size=0, max_term_size=100000, save_enrichment_obj=True):
         
+        if not filename_output.endswith('.csv'):
+            raise ValueError('The output filename needs to be a .csv file.')
+
         self.enrichment_obj.filename_joana_output = filename_output
         filename_output_ending = filename_output.split('.')[-1]
         dir_output = os.path.dirname(filename_output)
@@ -196,7 +199,7 @@ class JOANA:
 
     def plot_hidden_significant_genes(self, dir_output, signif_threshold=0.1, quantile=0.95, output_filetag=''):
         if self.enrichment_obj.joana_output is None:
-            print('Please run JOANA model at first or load an JOANA output.')
+            print('Please run JOANA model at first or load a JOANA output.')
         else:
             if self.enrichment_obj.type == 'single-species':
                 self._plot_hidden_significant_genes_single_species(dir_output, signif_threshold, quantile, output_filetag)
@@ -487,7 +490,7 @@ class JOANA:
     
     def plot_barplot(self, filename, threshold=0.5, fig_size=(8,6)):        
         if self.enrichment_obj.joana_output is None:
-            print('Please run JOANA model at first or load an JOANA output.')
+            print('Please run JOANA model at first or load a JOANA output.')
         if self.enrichment_obj.type == 'single-species':
             self.__plot_barplot_single_species(filename, threshold=threshold, fig_size=fig_size)
         elif self.enrichment_obj.type == 'cooperative':
@@ -570,7 +573,7 @@ class JOANA:
     def plot(self, filename, top_percentile_edges=0, scaling_factor=5, fig_heigth=12, fig_width=15,
              bbox=(100, 100, 600, 600), layout='kk', verbose_n_top_terms=-1, second_order='detailed', n_top_terms=10):
         if self.enrichment_obj.joana_output is None:
-            print('Please run JOANA model at first or load an JOANA output.')
+            print('Please run JOANA model at first or load a JOANA output.')
         else:
             if self.enrichment_obj.type == 'single-species':
                 self.__plot_single_species(filename, top_percentile_edges, scaling_factor, fig_heigth, fig_width,
