@@ -1,5 +1,6 @@
 from numpy.lib import index_tricks
 from numpy.lib.function_base import quantile
+from pandas.io.stata import ValueLabelTypeMismatch
 from seaborn.palettes import color_palette
 from joanapy.moment_fitting_core import MOMENT_FITTING
 import os
@@ -71,11 +72,15 @@ class JOANA:
         with open(self.enrichment_obj.filename_assignment_matrix, "w") as myfile:
             for line in assignment_matrix_filtered:
                 myfile.write(str(line) + '\n')
+        
+        # reload assignment matrix in enrichment objed
+        self.enrichment_obj.assignment_matrix = self.enrichment_obj.load_assignmentMatrix(self.enrichment_obj.filename_assignment_matrix)
 
         # filter terms
         terms_filtered = self.enrichment_obj.terms.iloc[ind_keep]
         self.enrichment_obj.filename_terms = self.enrichment_obj.filename_terms.replace('.txt', '_filtered_min%d_max%d.txt' %(min_term_size, max_term_size))
         terms_filtered.to_csv(self.enrichment_obj.filename_terms, index=False, header=False)
+        self.enrichment_obj.terms = terms_filtered
 
 
         if self.enrichment_obj.type == 'single-species':
@@ -158,7 +163,322 @@ class JOANA:
         # save enrichment_obj after JOANA run
         if save_enrichment_obj:
             self.enrichment_obj.save(filename_output.replace(filename_output_ending, 'pickle'))
+    
 
+
+
+
+    def run_directed(self, dir_output, statistical_direction_first, statistical_direction_second=None, filename_moment_fit_first=None, filename_moment_fit_second=None, tolerance_fitting=1E-5, steps_fitting=30000, verbose=True, goodness_of_fit=False, plot_components=False, prior_pA=1, min_term_size=0, max_term_size=100000, save_enrichment_obj=True):
+        
+        if self.enrichment_obj.type == 'cooperative' and statistical_direction_second is None:
+            raise ValueError('Please pass a statistical direction for the second species.')
+
+        # store in enrichment object
+        # setattr(self.enrichment_obj, 'statistical_direction', statistical_direction)
+        self.enrichment_obj.statistical_direction_first = statistical_direction_first
+        ind_upregulated_first = np.where(statistical_direction_first > 0)[0]
+        ind_downregulated_first = np.where(statistical_direction_first < 0)[0]
+
+        if not statistical_direction_second is None:
+            self.enrichment_obj.statistical_direction_second = statistical_direction_second
+            ind_upregulated_second = np.where(statistical_direction_second > 0)[0]
+            ind_downregulated_second = np.where(statistical_direction_second < 0)[0]
+
+        # create output directories for both directions
+        if not os.path.exists(dir_output):
+            os.makedirs(dir_output)
+
+        dir_output_up = os.path.join(dir_output, 'up_regulated')
+        if not os.path.exists(dir_output_up):
+            os.makedirs(dir_output_up)
+
+        dir_output_down = os.path.join(dir_output, 'down_regulated')
+        if not os.path.exists(dir_output_down):
+            os.makedirs(dir_output_down)
+
+
+        # get term sizes
+        term_sizes = np.zeros((len(self.enrichment_obj.terms), ))
+        for i in range(len(self.enrichment_obj.assignment_matrix)):
+            term_sizes[np.asarray(self.enrichment_obj.assignment_matrix[i])] += 1
+        pd.DataFrame({'terms' : self.enrichment_obj.terms.values.flatten(), 'size' : term_sizes}).to_csv(self.enrichment_obj.filename_terms.replace('.txt', '_sizes.txt'), index=False, header=True, sep='&')
+
+        # filter terms
+        ind_keep = np.intersect1d(np.where(min_term_size <= term_sizes)[0], np.where(term_sizes <= max_term_size)[0])
+        index_mapping = dict()
+        for i in range(len(ind_keep)):
+            index_mapping[ind_keep[i]] = i
+        
+        # filter assignment matrix
+        assignment_matrix_filtered = list()
+        for i in range(len(self.enrichment_obj.assignment_matrix)):
+            temp_gene_assignemnt = list(self.enrichment_obj.assignment_matrix[i])
+
+            # remove filtered terms
+            list_remove_ind = list()
+            for ind in temp_gene_assignemnt:
+                if not ind in ind_keep:
+                    list_remove_ind.append(ind)
+            [temp_gene_assignemnt.remove(x) for x in list_remove_ind]
+
+            # remap indices
+            assignment_matrix_filtered.append(','.join(np.asarray([str(index_mapping[x]) for x in temp_gene_assignemnt])))
+
+        # TODO potentially filter for genes without assignment
+        
+        self.enrichment_obj.filename_assignment_matrix = os.path.join(self.enrichment_obj.filename_assignment_matrix.replace('.txt', '_filtered_min%d_max%d.txt' %(min_term_size, max_term_size)))
+        with open(self.enrichment_obj.filename_assignment_matrix, "w") as myfile:
+            for line in assignment_matrix_filtered:
+                myfile.write(str(line) + '\n')
+            
+        self.enrichment_obj.assignment_matrix = self.enrichment_obj.load_assignmentMatrix(self.enrichment_obj.filename_assignment_matrix)
+
+        # filter terms
+        terms_filtered = self.enrichment_obj.terms.iloc[ind_keep]
+        self.enrichment_obj.filename_terms = self.enrichment_obj.filename_terms.replace('.txt', '_filtered_min%d_max%d.txt' %(min_term_size, max_term_size))
+        terms_filtered.to_csv(self.enrichment_obj.filename_terms, index=False, header=False)
+        self.enrichment_obj.terms = terms_filtered
+
+
+        #######################################################
+        ################## Moment fitting #####################
+        #######################################################
+
+        if filename_moment_fit_first is None:
+            # first species
+            filename_moment_fit_first = os.path.join(dir_output,'qvalues_first_moment_fitting.txt')
+            moment_fitting_first = MOMENT_FITTING(self.enrichment_obj.qvalues_first, filename_moment_fit_first, tolerance=tolerance_fitting, steps=steps_fitting)
+            moment_fitting_first.run(verbose=verbose)
+            if goodness_of_fit:
+                moment_fitting_first.goodness_of_fit(os.path.join(dir_output,'qvalues_first_moment_fitting_gof.txt'), plot_histograms=True)
+            if plot_components:
+                moment_fitting_first.plot_components_density(os.path.join(dir_output,'qvalues_first_moment_fitting_components.pdf'))
+            self.enrichment_obj.moment_fit_first = moment_fitting_first
+
+        if self.enrichment_obj.type == 'cooperative':
+            if filename_moment_fit_second is None:
+                # second species
+                filename_moment_fit_second = os.path.join(dir_output, 'qvalues_second_moment_fitting.txt')
+                ind_not_missing_second = self.enrichment_obj.missing_second.values == 0
+                moment_fitting_second = MOMENT_FITTING(self.enrichment_obj.qvalues_second[ind_not_missing_second.flatten()], filename_moment_fit_second, tolerance=tolerance_fitting, steps=steps_fitting)
+                moment_fitting_second.run(verbose=verbose)
+                if goodness_of_fit:
+                    moment_fitting_second.goodness_of_fit(os.path.join(dir_output,'qvalues_second_moment_fitting_gof.txt'), plot_histograms=True)
+                if plot_components:
+                    moment_fitting_second.plot_components_density(os.path.join(dir_output,'qvalues_second_moment_fitting_components.pdf'))
+                self.enrichment_obj.moment_fit_second = moment_fitting_second
+
+
+        #######################################################
+        ################### UPREGULATED #######################
+        #######################################################
+
+        # create assignment matrix for upregulated genes
+        basename_assignment = os.path.basename(self.enrichment_obj.filename_assignment_matrix)
+        with open(os.path.join(dir_output_up, basename_assignment), "w") as myfile:
+            for i, line in enumerate(assignment_matrix_filtered):
+                if i in ind_upregulated_first:
+                    myfile.write(str(line) + '\n')
+        
+
+        # create qvalues file with upregulated qvalues for first species
+        filename_qvalues_first_upregulated = os.path.join(dir_output_up, 'qvalues_first_upregulated.txt')
+        pd.DataFrame(self.enrichment_obj.qvalues_first[ind_upregulated_first]).to_csv(filename_qvalues_first_upregulated, header=False, index=False)
+
+
+        # prepare files for UPREGULATED
+        if self.enrichment_obj.type == 'single-species':
+            
+            while self.__has_handle(FILENAME_JOANA):
+                continue
+
+            filename_output_upregulated = os.path.join(dir_output_up, 'JOANA_single-species_upregulated.csv')
+            call(['mono',
+                  FILENAME_JOANA,
+                  '1',
+                  os.path.join(dir_output_up, basename_assignment),
+                  self.enrichment_obj.filename_terms,
+                  filename_qvalues_first_upregulated,
+                  filename_moment_fit_first,
+                  filename_output_upregulated,
+                  str(int(prior_pA))])
+
+
+        if self.enrichment_obj.type == 'cooperative':
+            # find qvalues from second species which are overlapping upregulated with the one from first species
+            qvalues_second_upregulated = np.ones((len(ind_upregulated_first), ))
+            missing_second_upregulated = np.zeros((len(ind_upregulated_first), ), dtype=int)
+            missing_first_upregulated = np.zeros((len(ind_upregulated_first), ), dtype=int)
+            counter = 0
+            ind_second_not_missing = list()
+            for i in range(len(self.enrichment_obj.qvalues_first)):
+                if i in ind_upregulated_first and i in ind_upregulated_second:
+                    qvalues_second_upregulated[counter] = self.enrichment_obj.qvalues_second[i]
+                    counter += 1
+                    ind_second_not_missing.append(i)
+                elif i in ind_upregulated_first and not i in ind_upregulated_second:
+                    missing_second_upregulated[counter] = 1
+                    counter += 1
+            filename_qvalues_second_upregulated = os.path.join(dir_output_up, 'qvalues_second_upregulated.txt')
+            pd.DataFrame(qvalues_second_upregulated).to_csv(filename_qvalues_second_upregulated, header=False, index=False)
+            ind_second_not_missing = np.asarray(ind_second_not_missing)
+            filename_missing_second_upregulated = os.path.join(dir_output_up, 'missing_second_upregulated.txt')
+            pd.DataFrame(missing_second_upregulated).to_csv(filename_missing_second_upregulated, header=False, index=False)
+            filename_missing_first_upregulated = os.path.join(dir_output_up, 'missing_first_upregulated.txt')
+            pd.DataFrame(missing_first_upregulated).to_csv(filename_missing_first_upregulated, header=False, index=False)
+
+            while self.__has_handle(FILENAME_JOANA):
+                continue
+            
+            filename_output_upregulated = os.path.join(dir_output_up, 'JOANA_cooperative-single-species_upregulated.csv')
+            call(['mono',
+                FILENAME_JOANA,
+                '0',
+                os.path.join(dir_output_up, basename_assignment),
+                self.enrichment_obj.filename_terms,
+                filename_qvalues_first_upregulated,
+                filename_qvalues_second_upregulated,
+                filename_missing_first_upregulated,
+                filename_missing_second_upregulated,
+                filename_moment_fit_first,
+                filename_moment_fit_second,
+                filename_output_upregulated,
+                str(int(prior_pA))])
+
+        # load joana output in enrichment object
+        if os.path.exists(filename_output_upregulated):
+            self.enrichment_obj.joana_output_upregulated = pd.read_csv(filename_output_upregulated, index_col='Terms')
+
+        #######################################################
+        ################## DOWNREGULATED ######################
+        #######################################################
+
+        # define the standard filename for terms, if we filter for upregulated terms this will we reassigned
+        filename_terms_downregulation = self.enrichment_obj.filename_terms
+        # filter terms which are predicted to be upreagulated from assignment matrix
+        if not self.enrichment_obj.joana_output_upregulated is None:
+            joana_output_up = self.enrichment_obj.joana_output_upregulated.copy()
+
+            # filter results data frame for active terms
+            if self.enrichment_obj.type == 'single-species':
+                joana_output_up = joana_output_up[joana_output_up['Single-Species'] > 0.5]
+            if self.enrichment_obj.type == 'cooperative':
+                joana_output_up_cooperative = joana_output_up[joana_output_up['Cooperative'] > 0.5]
+                joana_output_up_single_species_1 = joana_output_up[joana_output_up['Single-Species-1'] > 0.5]
+                joana_output_up_single_species_2 = joana_output_up[joana_output_up['Single-Species-2'] > 0.5]
+                joana_output_up = pd.concat([joana_output_up_cooperative, joana_output_up_single_species_1, joana_output_up_single_species_2])
+            terms_to_filter_out = np.unique(joana_output_up.index.values)
+            
+            ind_keep = np.asarray([i for i in range(len(self.enrichment_obj.terms)) if not self.enrichment_obj.terms.values[i] in terms_to_filter_out])
+            index_mapping = dict()
+            for i in range(len(ind_keep)):
+                index_mapping[ind_keep[i]] = i
+            
+            # filter assignment matrix
+            assignment_matrix_filtered = list()
+            for i in range(len(self.enrichment_obj.assignment_matrix)):
+                temp_gene_assignemnt = list(self.enrichment_obj.assignment_matrix[i])
+
+                # remove filtered terms
+                list_remove_ind = list()
+                for ind in temp_gene_assignemnt:
+                    if not ind in ind_keep:
+                        list_remove_ind.append(ind)
+                [temp_gene_assignemnt.remove(x) for x in list_remove_ind]
+
+                # remap indices
+                assignment_matrix_filtered.append(','.join(np.asarray([str(index_mapping[x]) for x in temp_gene_assignemnt])))
+
+            # TODO potentially filter for genes without assignment
+
+            # filter terms
+            terms_filtered = self.enrichment_obj.terms.iloc[ind_keep]
+            filename_terms_downregulation = os.path.join(dir_output_down, os.path.basename(self.enrichment_obj.filename_terms).replace('.txt', '_filtered_upregulated.txt'))
+            terms_filtered.to_csv(filename_terms_downregulation, index=False, header=False)
+
+
+
+        # create assignment matrix for downregulated genes
+        basename_assignment = os.path.basename(self.enrichment_obj.filename_assignment_matrix)
+        with open(os.path.join(dir_output_down, basename_assignment), "w") as myfile:
+            for i, line in enumerate(assignment_matrix_filtered):
+                if i in ind_downregulated_first:
+                    myfile.write(str(line) + '\n')
+        
+
+        # create qvalues file with downregulated qvalues for first species
+        filename_qvalues_first_downregulated = os.path.join(dir_output_down, 'qvalues_first_downregulated.txt')
+        pd.DataFrame(self.enrichment_obj.qvalues_first[ind_downregulated_first]).to_csv(filename_qvalues_first_downregulated, header=False, index=False)
+
+        # prepare files for DOWNREGULATED
+        if self.enrichment_obj.type == 'single-species':
+
+            while self.__has_handle(FILENAME_JOANA):
+                continue
+            
+            filename_output_downregulated = os.path.join(dir_output_down, 'JOANA_single-species_downregulated.csv')
+            call(['mono',
+                  FILENAME_JOANA,
+                  '1',
+                  os.path.join(dir_output_down, basename_assignment),
+                  filename_terms_downregulation,
+                  filename_qvalues_first_downregulated,
+                  filename_moment_fit_first,
+                  filename_output_downregulated,
+                  str(int(prior_pA))])
+
+
+        if self.enrichment_obj.type == 'cooperative':
+            # find qvalues from second species which are overlapping downregulated with the one from first species
+            qvalues_second_downregulated = np.ones((len(ind_downregulated_first), ))
+            missing_second_downregulated = np.zeros((len(ind_downregulated_first), ), dtype=int)
+            missing_first_downregulated = np.zeros((len(ind_downregulated_first), ), dtype=int)
+            counter = 0
+            ind_second_not_missing = list()
+            for i in range(len(self.enrichment_obj.qvalues_first)):
+                if i in ind_downregulated_first and i in ind_downregulated_second:
+                    qvalues_second_downregulated[counter] = self.enrichment_obj.qvalues_second[i]
+                    counter += 1
+                    ind_second_not_missing.append(i)
+                elif i in ind_downregulated_first and not i in ind_downregulated_second:
+                    missing_second_downregulated[counter] = 1
+                    counter += 1
+            filename_qvalues_second_downregulated = os.path.join(dir_output_down, 'qvalues_second_downregulated.txt')
+            pd.DataFrame(qvalues_second_downregulated).to_csv(filename_qvalues_second_downregulated, header=False, index=False)
+            ind_second_not_missing = np.asarray(ind_second_not_missing)
+            filename_missing_second_downregulated = os.path.join(dir_output_down, 'missing_second_downregulated.txt')
+            pd.DataFrame(missing_second_downregulated).to_csv(filename_missing_second_downregulated, header=False, index=False)
+            filename_missing_first_downregulated = os.path.join(dir_output_down, 'missing_first_downregulated.txt')
+            pd.DataFrame(missing_first_downregulated).to_csv(filename_missing_first_downregulated, header=False, index=False)
+            
+            while self.__has_handle(FILENAME_JOANA):
+                continue
+
+            filename_output_downregulated = os.path.join(dir_output_down, 'JOANA_cooperative-single-species_downregulated.csv')
+            call(['mono',
+                FILENAME_JOANA,
+                '0',
+                os.path.join(dir_output_down, basename_assignment),
+                filename_terms_downregulation,
+                filename_qvalues_first_downregulated,
+                filename_qvalues_second_downregulated,
+                filename_missing_first_downregulated,
+                filename_missing_second_downregulated,
+                filename_moment_fit_first,
+                filename_moment_fit_second,
+                filename_output_downregulated,
+                str(int(prior_pA))])
+
+        # load joana output in enrichment object
+        if os.path.exists(filename_output_downregulated):
+            self.enrichment_obj.joana_output_downregulated = pd.read_csv(filename_output_downregulated, index_col='Terms')
+
+        # save enrichment_obj after JOANA run
+        if save_enrichment_obj:
+            self.enrichment_obj.save(os.path.join(dir_output, 'enrichment_obj_up_down_min%d_max%d.pickle' %(min_term_size, max_term_size)))
+
+
+        
 
     def __has_handle(self, fpath):
         for proc in psutil.process_iter():
@@ -488,27 +808,28 @@ class JOANA:
         plt.close()
 
     
-    def plot_barplot(self, filename, threshold=0.5, fig_size=(8,6)):        
-        if self.enrichment_obj.joana_output is None:
+    def plot_barplot(self, filename, joana_output='joana_output', threshold=0.5, fig_size=(8,6)):        
+        if getattr(self.enrichment_obj, joana_output) is None:
             print('Please run JOANA model at first or load a JOANA output.')
         if self.enrichment_obj.type == 'single-species':
-            self.__plot_barplot_single_species(filename, threshold=threshold, fig_size=fig_size)
+            self.__plot_barplot_single_species(filename, joana_output=joana_output, threshold=threshold, fig_size=fig_size)
         elif self.enrichment_obj.type == 'cooperative':
-            self.__plot_barplot_cooperative(filename, threshold=threshold, fig_size=fig_size)
+            self.__plot_barplot_cooperative(filename, joana_output=joana_output, threshold=threshold, fig_size=fig_size)
 
-    def __plot_barplot_single_species(self, filename, threshold=0.5, fig_size=(8,6)):
-        joana_result = self.enrichment_obj.joana_output.sort_values(by='Single-Species', ascending=False)
+    def __plot_barplot_single_species(self, filename, joana_output='joana_output', threshold=0.5, fig_size=(8,6)):
+        joana_result = getattr(self.enrichment_obj, joana_output).sort_values(by='Single-Species', ascending=False)
         joana_result_filtered = joana_result[joana_result['Single-Species'] > threshold]
         joana_result_filtered.reset_index(inplace=True)
 
         plt.figure(figsize=fig_size)
         ax = sns.barplot(x='Single-Species', y='Terms', data=joana_result_filtered, color='forestgreen')
         plt.xlim([threshold, 1.])
-        plt.savefig(filename, bbox_inches='tight')
+        fname_ending = filename.split('.')[-1]
+        plt.savefig(filename.replace('.'+fname_ending, '_' + joana_output + '.' + fname_ending), bbox_inches='tight')
         plt.close()
 
-    def __plot_barplot_cooperative(self, filename, threshold=0.5, fig_size=(8,6)):
-        joana_result = self.enrichment_obj.joana_output
+    def __plot_barplot_cooperative(self, filename, joana_output='joana_output', threshold=0.5, fig_size=(8,6)):
+        joana_result = getattr(self.enrichment_obj, joana_output)
 
         joana_cooperative = joana_result[joana_result['Cooperative'] > threshold]
         joana_cooperative_merge = pd.DataFrame({'Terms' : joana_cooperative.index.values,'Probability' : joana_cooperative['Cooperative'], 'Model' : ['Cooperative'] * joana_cooperative.shape[0]})
@@ -535,37 +856,39 @@ class JOANA:
 
         color = {'Cooperative' : 'lime', 'Single-Species-1' : 'orange', 'Single-Species-2' : 'khaki'}
         fig = plt.figure(figsize=fig_size)
+        plt.subplots_adjust(hspace=.5)
         if joana_cooperative_merge.shape[0] > 0:
             if not subplots_number is None:
-                plt.subplot(subplots_number)
+                ax_sub = plt.subplot(subplots_number)
                 subplots_number += 1
             ax = sns.barplot(y='Terms', x='Probability', hue='Model', data=joana_cooperative_merge, palette=color)
             plt.legend([],[], frameon=False)
-            plt.xlabel('Probability', fontsize=18)
-            plt.ylabel('Terms', fontsize=18)
-            plt.title('Cooperative', fontsize=18)
+            ax_sub.set_xlabel('Probability', fontsize=18)
+            ax_sub.set_ylabel('Terms', fontsize=18)
+            ax_sub.set_title('Cooperative', fontsize=18)
             plt.xlim([threshold, 1.])
         if joana_single_species_1_merge.shape[0] > 0:
             if not subplots_number is None:
-                plt.subplot(subplots_number)
+                ax_sub = plt.subplot(subplots_number)
                 subplots_number += 1
             ax = sns.barplot(y='Terms', x='Probability', hue='Model', data=joana_single_species_1_merge, palette=color)
             plt.legend([],[], frameon=False)
-            plt.xlabel('Probability', fontsize=18)
-            plt.ylabel('Terms', fontsize=18)
-            plt.title('Single-Species-1', fontsize=20)
+            ax_sub.set_xlabel('Probability', fontsize=18)
+            ax_sub.set_ylabel('Terms', fontsize=18)
+            ax_sub.set_title('Single-Species-1', fontsize=20)
             plt.xlim([threshold, 1.])
         if joana_single_species_2_merge.shape[0] > 0:
             if not subplots_number is None:
-                plt.subplot(subplots_number)
+                ax_sub = plt.subplot(subplots_number)
                 subplots_number += 1
             ax = sns.barplot(y='Terms', x='Probability', hue='Model', data=joana_single_species_2_merge, palette=color)
             plt.legend([],[], frameon=False)
-            plt.xlabel('Probability', fontsize=18)
-            plt.ylabel('Terms', fontsize=18)
-            plt.title('Single-Species-2', fontsize=20)
+            ax_sub.set_xlabel('Probability', fontsize=18)
+            ax_sub.set_ylabel('Terms', fontsize=18)
+            ax_sub.set_title('Single-Species-2', fontsize=20)
             plt.xlim([threshold, 1.])
-        plt.savefig(filename, bbox_inches='tight')
+        fname_ending = filename.split('.')[-1]
+        plt.savefig(filename.replace('.'+fname_ending, '_' + joana_output + '.' + fname_ending), bbox_inches='tight')
         plt.close()
 
 
