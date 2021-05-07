@@ -8,13 +8,15 @@ class ENRICHMENT_OBJ:
     moment_fit_first = None
     moment_fit_second = None
     joana_output = None
+    joana_output_upregulated = None
+    joana_output_downregulated = None
 
 
 
     def __init__(self, filename_assignment_matrix, filename_terms, filename_qvalues_first, **kwargs):
         # single species
         self.filename_assignment_matrix = filename_assignment_matrix
-        self.assignment_matrix = self.__load_assignmentMatrix(filename_assignment_matrix)
+        self.assignment_matrix = self.load_assignmentMatrix(filename_assignment_matrix)
         self.filename_terms = filename_terms
         self.terms = pd.read_table(self.filename_terms, header=None)
         self.filename_qvalues_first = filename_qvalues_first
@@ -38,7 +40,7 @@ class ENRICHMENT_OBJ:
 
 
 
-    def __load_assignmentMatrix(self, filename):
+    def load_assignmentMatrix(self, filename):
         lines = tuple(open(filename, 'r'))
         assignment = []
 
