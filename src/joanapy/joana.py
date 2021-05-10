@@ -3,9 +3,10 @@ from numpy.lib.function_base import quantile
 from pandas.io.stata import ValueLabelTypeMismatch
 from seaborn.palettes import color_palette
 from joanapy.moment_fitting_core import MOMENT_FITTING
+from joanapy.enrichment_obj import ENRICHMENT_OBJ
+from joanapy.joana_helper import load_assignmentMatrix
 import os
 from subprocess import call
-from joanapy.enrichment_obj import ENRICHMENT_OBJ
 import pandas as pd
 import numpy as np
 import psutil
@@ -27,6 +28,10 @@ class JOANA:
     def __init__(self, enrichment_obj: ENRICHMENT_OBJ):
         self.enrichment_obj = enrichment_obj
 
+
+    ########################################################################################################################################
+    ################################################################# RUN JOANA ############################################################
+    ########################################################################################################################################
 
     def run(self, filename_output, filename_moment_fit_first=None, filename_moment_fit_second=None, tolerance_fitting=1E-5, steps_fitting=30000, verbose=True, goodness_of_fit=False, plot_components=False, prior_pA=1, min_term_size=0, max_term_size=100000, save_enrichment_obj=True):
         
@@ -74,7 +79,7 @@ class JOANA:
                 myfile.write(str(line) + '\n')
         
         # reload assignment matrix in enrichment objed
-        self.enrichment_obj.assignment_matrix = self.enrichment_obj.load_assignmentMatrix(self.enrichment_obj.filename_assignment_matrix)
+        self.enrichment_obj.assignment_matrix = load_assignmentMatrix(self.enrichment_obj.filename_assignment_matrix)
 
         # filter terms
         terms_filtered = self.enrichment_obj.terms.iloc[ind_keep]
@@ -167,8 +172,11 @@ class JOANA:
 
 
 
+    ########################################################################################################################################
+    ################################################################# RUN JOANA DIRECTIVE ##################################################
+    ########################################################################################################################################
 
-    def run_directed(self, dir_output, statistical_direction_first, statistical_direction_second=None, filename_moment_fit_first=None, filename_moment_fit_second=None, tolerance_fitting=1E-5, steps_fitting=30000, verbose=True, goodness_of_fit=False, plot_components=False, prior_pA=1, min_term_size=0, max_term_size=100000, save_enrichment_obj=True):
+    def run_directive(self, dir_output, statistical_direction_first, statistical_direction_second=None, filename_moment_fit_first=None, filename_moment_fit_second=None, tolerance_fitting=1E-5, steps_fitting=30000, verbose=True, goodness_of_fit=False, plot_components=False, prior_pA=1, min_term_size=0, max_term_size=100000, save_enrichment_obj=True):
         
         if self.enrichment_obj.type == 'cooperative' and statistical_direction_second is None:
             raise ValueError('Please pass a statistical direction for the second species.')
@@ -231,7 +239,7 @@ class JOANA:
             for line in assignment_matrix_filtered:
                 myfile.write(str(line) + '\n')
             
-        self.enrichment_obj.assignment_matrix = self.enrichment_obj.load_assignmentMatrix(self.enrichment_obj.filename_assignment_matrix)
+        self.enrichment_obj.assignment_matrix = load_assignmentMatrix(self.enrichment_obj.filename_assignment_matrix)
 
         # filter terms
         terms_filtered = self.enrichment_obj.terms.iloc[ind_keep]
@@ -517,6 +525,15 @@ class JOANA:
     #         print("%s not found." % filepath)
     #     return locked
 
+
+
+
+
+    ########################################################################################################################################
+    ############################################# HIDDEN SIGNIFICANT OF JOANA RESULTS ######################################################
+    ########################################################################################################################################
+
+
     def plot_hidden_significant_genes(self, dir_output, signif_threshold=0.1, quantile=0.95, output_filetag=''):
         if self.enrichment_obj.joana_output is None:
             print('Please run JOANA model at first or load a JOANA output.')
@@ -601,12 +618,6 @@ class JOANA:
         else:
             plt.savefig(os.path.join(dir_output, 'absolut_beta_significant_genes_vs_probability_%s_%s_%s.pdf' % (str(np.round(signif_threshold, 3)), col, output_filetag)), bbox_inches='tight')
         plt.close()
-
-
-
-
-
-
 
 
     def __plot_hidden_significant_genes_cooperative(self, dir_output, signif_threshold=0.1, quantile=0.95, output_filetag=''):
@@ -807,6 +818,14 @@ class JOANA:
             plt.savefig(os.path.join(dir_output, 'absolut_beta_significant_genes_vs_probability_%s_%s_%s.pdf' % (str(np.round(signif_threshold, 3)), col, output_filetag)), bbox_inches='tight')
         plt.close()
 
+
+
+
+
+    ########################################################################################################################################
+    ######################################################## BARPLOT OF JOANA RESULTS ######################################################
+    ########################################################################################################################################
+
     
     def plot_barplot(self, filename, joana_output='joana_output', threshold=0.5, fig_size=(8,6)):        
         if getattr(self.enrichment_obj, joana_output) is None:
@@ -891,6 +910,13 @@ class JOANA:
         plt.savefig(filename.replace('.'+fname_ending, '_' + joana_output + '.' + fname_ending), bbox_inches='tight')
         plt.close()
 
+
+
+
+
+    ########################################################################################################################################
+    ######################################################## GRAPH PLOT OF JOANA RESULTS ###################################################
+    ########################################################################################################################################
 
 
     def plot(self, filename, top_percentile_edges=0, scaling_factor=5, fig_heigth=12, fig_width=15,
