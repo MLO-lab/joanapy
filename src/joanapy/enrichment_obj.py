@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import dill
+from joanapy.joana_helper import load_assignmentMatrix
 
 class ENRICHMENT_OBJ:
 
@@ -16,7 +17,7 @@ class ENRICHMENT_OBJ:
     def __init__(self, filename_assignment_matrix, filename_terms, filename_qvalues_first, **kwargs):
         # single species
         self.filename_assignment_matrix = filename_assignment_matrix
-        self.assignment_matrix = self.load_assignmentMatrix(filename_assignment_matrix)
+        self.assignment_matrix = load_assignmentMatrix(filename_assignment_matrix)
         self.filename_terms = filename_terms
         self.terms = pd.read_table(self.filename_terms, header=None)
         self.filename_qvalues_first = filename_qvalues_first
@@ -38,24 +39,6 @@ class ENRICHMENT_OBJ:
         else:
             self.type = 'cooperative'
 
-
-
-    def load_assignmentMatrix(self, filename):
-        lines = tuple(open(filename, 'r'))
-        assignment = []
-
-        for i in range(0, len(lines)):
-            if (lines[i].endswith('\n')):
-                line_temp = lines[i][:-1]
-            else:
-                line_temp = lines[i]
-
-            split = line_temp.split(',')
-            # assignment.append(map(int,split))
-            assignment.append(np.asarray([int(x) for x in split]))
-
-        return (assignment)
- 
     
     def save(self, filename):
         dill.dump(self, file = open(filename, "wb"))

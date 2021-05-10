@@ -85,6 +85,20 @@ def transform_gmt_assignment_matrix(filename_gmt_assignment, gene_ids, filename_
 
 
 
+def load_assignmentMatrix(filename):
+    lines = tuple(open(filename, 'r'))
+    assignment = []
+
+    for i in range(0, len(lines)):
+        if (lines[i].endswith('\n')):
+            line_temp = lines[i][:-1]
+        else:
+            line_temp = lines[i]
+
+        split = line_temp.split(',')
+        # assignment.append(map(int,split))
+        assignment.append(np.asarray([int(x) for x in split]))
+
+    return (assignment)
 
 
-    
