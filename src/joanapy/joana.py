@@ -16,6 +16,7 @@ matplotlib.use("cairo")
 import matplotlib.pyplot as plt
 from matplotlib import cm
 from matplotlib.artist import Artist
+from matplotlib import gridspec
 from igraph import BoundingBox, Graph, palettes
 import seaborn as sns
 
@@ -827,29 +828,39 @@ class JOANA:
     ########################################################################################################################################
 
     
-    def plot_barplot(self, filename, joana_output='joana_output', threshold=0.5, fig_size=(8,6)):        
+    def plot_barplot(self, filename, joana_output='joana_output', threshold=0.5):        
         if getattr(self.enrichment_obj, joana_output) is None:
             print('Please run JOANA model at first or load a JOANA output.')
         if self.enrichment_obj.type == 'single-species':
-            self.__plot_barplot_single_species(filename, joana_output=joana_output, threshold=threshold, fig_size=fig_size)
+            self.__plot_barplot_single_species(filename, joana_output=joana_output, threshold=threshold,)
         elif self.enrichment_obj.type == 'cooperative':
-            self.__plot_barplot_cooperative(filename, joana_output=joana_output, threshold=threshold, fig_size=fig_size)
+            self.__plot_barplot_cooperative(filename, joana_output=joana_output, threshold=threshold)
 
-    def __plot_barplot_single_species(self, filename, joana_output='joana_output', threshold=0.5, fig_size=(8,6)):
+    def __plot_barplot_single_species(self, filename, joana_output='joana_output', threshold=0.5):
         joana_result = getattr(self.enrichment_obj, joana_output).sort_values(by='Single-Species', ascending=False)
         joana_result_filtered = joana_result[joana_result['Single-Species'] > threshold]
         joana_result_filtered.reset_index(inplace=True)
 
-        plt.figure(figsize=fig_size)
+        n_active_terms = joana_result_filtered.shape[0]
+        fig_heigth_factor = (n_active_terms / 5) - 1
+        if fig_heigth_factor < 0:
+            fig_heigth_factor = 0
+        fig_height = 1 + 2.3*fig_heigth_factor
+
+        plt.figure(figsize=(8, fig_height))
         ax = sns.barplot(x='Single-Species', y='Terms', data=joana_result_filtered, color='forestgreen')
         plt.xlim([threshold, 1.])
         fname_ending = filename.split('.')[-1]
         plt.savefig(filename.replace('.'+fname_ending, '_' + joana_output + '.' + fname_ending), bbox_inches='tight')
         plt.close()
 
-    def __plot_barplot_cooperative(self, filename, joana_output='joana_output', threshold=0.5, fig_size=(8,6)):
+    def __plot_barplot_cooperative(self, filename, joana_output='joana_output', threshold=0.5):
+        # automatic fig_size.. 
+        # 1 inch = 177 pixel heigth
+        # adding an inch is additional 77 pixel in height
+        
         joana_result = getattr(self.enrichment_obj, joana_output)
-
+        
         joana_cooperative = joana_result[joana_result['Cooperative'] > threshold]
         joana_cooperative_merge = pd.DataFrame({'Terms' : joana_cooperative.index.values,'Probability' : joana_cooperative['Cooperative'], 'Model' : ['Cooperative'] * joana_cooperative.shape[0]})
         joana_cooperative_merge = joana_cooperative_merge.sort_values(by='Probability', ascending=False).reset_index(drop=True)
@@ -864,52 +875,69 @@ class JOANA:
         joana_single_species_2_merge = pd.DataFrame({'Terms' : joana_single_species_2.index.values,'Probability' : joana_single_species_2['Single-Species-2'], 'Model' : ['Single-Species-2'] * joana_single_species_2.shape[0]})
         joana_single_species_2_merge = joana_single_species_2_merge.sort_values(by='Probability', ascending=False).reset_index(drop=True)
 
-        # iterative assignemnt of how many subplots we need based on number of active modeling results from the different species        
+        # define fig size
+        n_active_terms = joana_cooperative_merge.shape[0] + joana_single_species_1_merge.shape[0] + joana_single_species_2_merge.shape[0]
+        fig_heigth_factor = (n_active_terms / 5) - 1
+        if fig_heigth_factor < 0:
+            fig_heigth_factor = 0
+        fig_height = 1 + 2.3*fig_heigth_factor
+
+        # iterative assignemnt of how many subplots we need based on number of active modeling results from the different species     
         active_models = int(joana_cooperative_merge.shape[0] > 0) + int(joana_single_species_1_merge.shape[0] > 0) + int(joana_single_species_2_merge.shape[0] > 0)
         if active_models == 3:
             subplots_number = 311
+            gs = gridspec.GridSpec(3, 1, height_ratios=[joana_cooperative_merge.shape[0], joana_single_species_1_merge.shape[0], joana_single_species_2_merge.shape[0]])    
         elif active_models == 2:
             subplots_number = 211
+            if joana_cooperative_merge.shape[0] > 0 and joana_single_species_1_merge.shape[0] > 0:
+                gs = gridspec.GridSpec(2, 1, height_ratios=[joana_cooperative_merge.shape[0], joana_single_species_1_merge.shape[0]])
+            elif joana_cooperative_merge.shape[0] > 0 and joana_single_species_2_merge.shape[0] > 0:
+                gs = gridspec.GridSpec(2, 1, height_ratios=[joana_cooperative_merge.shape[0], joana_single_species_2_merge.shape[0]])    
+            else:
+                gs = gridspec.GridSpec(2, 1, height_ratios=[joana_single_species_1_merge.shape[0], joana_single_species_2_merge.shape[0]])    
         else:
             subplots_number = None
 
+        gs_counter = 0
         color = {'Cooperative' : 'lime', 'Single-Species-1' : 'orange', 'Single-Species-2' : 'khaki'}
-        fig = plt.figure(figsize=fig_size)
+        fig = plt.figure(figsize=(8, fig_height))
         plt.subplots_adjust(hspace=.5)
         if joana_cooperative_merge.shape[0] > 0:
             if not subplots_number is None:
-                ax_sub = plt.subplot(subplots_number)
+                ax_sub = plt.subplot(gs[gs_counter])
+                gs_counter += 1
                 subplots_number += 1
             ax = sns.barplot(y='Terms', x='Probability', hue='Model', data=joana_cooperative_merge, palette=color)
             plt.legend([],[], frameon=False)
-            ax_sub.set_xlabel('Probability', fontsize=18)
-            ax_sub.set_ylabel('Terms', fontsize=18)
-            ax_sub.set_title('Cooperative', fontsize=18)
+            ax.set_xlabel('Probability', fontsize=18)
+            ax.set_ylabel('Terms', fontsize=18)
+            ax.set_title('Cooperative', fontsize=18)
             plt.xlim([threshold, 1.])
         if joana_single_species_1_merge.shape[0] > 0:
             if not subplots_number is None:
-                ax_sub = plt.subplot(subplots_number)
+                ax_sub = plt.subplot(gs[gs_counter])
+                gs_counter += 1
                 subplots_number += 1
             ax = sns.barplot(y='Terms', x='Probability', hue='Model', data=joana_single_species_1_merge, palette=color)
             plt.legend([],[], frameon=False)
-            ax_sub.set_xlabel('Probability', fontsize=18)
-            ax_sub.set_ylabel('Terms', fontsize=18)
-            ax_sub.set_title('Single-Species-1', fontsize=20)
+            ax.set_xlabel('Probability', fontsize=18)
+            ax.set_ylabel('Terms', fontsize=18)
+            ax.set_title('Single-Species-1', fontsize=20)
             plt.xlim([threshold, 1.])
         if joana_single_species_2_merge.shape[0] > 0:
             if not subplots_number is None:
-                ax_sub = plt.subplot(subplots_number)
+                ax_sub = plt.subplot(gs[gs_counter])
+                gs_counter += 1
                 subplots_number += 1
             ax = sns.barplot(y='Terms', x='Probability', hue='Model', data=joana_single_species_2_merge, palette=color)
             plt.legend([],[], frameon=False)
-            ax_sub.set_xlabel('Probability', fontsize=18)
-            ax_sub.set_ylabel('Terms', fontsize=18)
-            ax_sub.set_title('Single-Species-2', fontsize=20)
+            ax.set_xlabel('Probability', fontsize=18)
+            ax.set_ylabel('Terms', fontsize=18)
+            ax.set_title('Single-Species-2', fontsize=20)
             plt.xlim([threshold, 1.])
         fname_ending = filename.split('.')[-1]
         plt.savefig(filename.replace('.'+fname_ending, '_' + joana_output + '.' + fname_ending), bbox_inches='tight')
         plt.close()
-
 
 
 
