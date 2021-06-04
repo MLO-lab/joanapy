@@ -97,7 +97,7 @@ def load_assignmentMatrix(filename):
 
         split = line_temp.split(',')
         # assignment.append(map(int,split))
-        assignment.append(np.asarray([int(x) for x in split]))
+        assignment.append(np.asarray([int(x) for x in split if x != '']))
 
     return (assignment)
 
