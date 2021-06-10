@@ -283,5 +283,23 @@ class MOMENT_FITTING:
         plt.close()
 
 
+    def plot_mixture_pdfs(self, filename_output):
+        x = np.arange(0., 1., 0.01)
+        pdf = beta.pdf
+
+        pdf_active = pdf(x, self.ab[0][0], self.ab[0][0])
+        pdf_inactive_1 = pdf(x, self.ab[1][0], self.ab[1][1])
+        pdf_inactive_2 = pdf(x, self.ab[2][0], self.ab[2][1])
+
+        plt.figure()
+        plt.plot(x, pdf_active, label='Active', color='green')
+        plt.plot(x, pdf_inactive_1, label='Inactive 1', color='coral')
+        plt.plot(x, pdf_inactive_2, label='Inactive 2', color='red')
+        plt.xlabel('x', fontsize=18)
+        plt.ylabel("PDF", fontsize=18)
+        plt.legend(loc='best', fontsize=18)
+        plt.xlim([0., 1.])
+        plt.savefig(filename_output, bbox_inches='tight')
+        plt.close()
 
 

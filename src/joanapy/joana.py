@@ -101,6 +101,7 @@ class JOANA:
                     moment_fitting_first.goodness_of_fit(os.path.join(os.path.dirname(filename_output),'qvalues_first_moment_fitting_gof.txt'), plot_histograms=True)
                 if plot_components:
                     moment_fitting_first.plot_components_density(os.path.join(os.path.dirname(filename_output),'qvalues_first_moment_fitting_components.pdf'))
+                    moment_fitting_first.plot_mixture_pdfs(os.path.join(os.path.dirname(filename_output),'qvalues_first_moment_fitting_mixture_pdf.pdf'))
                 self.enrichment_obj.moment_fit_first = moment_fitting_first
 
             while self.__has_handle(FILENAME_JOANA):
@@ -130,6 +131,7 @@ class JOANA:
                     moment_fitting_first.goodness_of_fit(os.path.join(os.path.dirname(filename_output),'qvalues_first_moment_fitting_gof.txt'), plot_histograms=True)
                 if plot_components:
                     moment_fitting_first.plot_components_density(os.path.join(os.path.dirname(filename_output),'qvalues_first_moment_fitting_components.pdf'))
+                    moment_fitting_first.plot_mixture_pdfs(os.path.join(os.path.dirname(filename_output),'qvalues_first_moment_fitting_mixture_pdf.pdf'))
                 self.enrichment_obj.moment_fit_first = moment_fitting_first
 
             if filename_moment_fit_second is None:
@@ -143,6 +145,7 @@ class JOANA:
                     moment_fitting_second.goodness_of_fit(os.path.join(os.path.dirname(filename_output),'qvalues_second_moment_fitting_gof.txt'), plot_histograms=True)
                 if plot_components:
                     moment_fitting_second.plot_components_density(os.path.join(os.path.dirname(filename_output),'qvalues_second_moment_fitting_components.pdf'))
+                    moment_fitting_second.plot_mixture_pdfs(os.path.join(os.path.dirname(filename_output),'qvalues_second_moment_fitting_mixture_pdf.pdf'))
                 self.enrichment_obj.moment_fit_second = moment_fitting_second
 
             while self.__has_handle(FILENAME_JOANA):
@@ -262,6 +265,7 @@ class JOANA:
                 moment_fitting_first.goodness_of_fit(os.path.join(dir_output,'qvalues_first_moment_fitting_gof.txt'), plot_histograms=True)
             if plot_components:
                 moment_fitting_first.plot_components_density(os.path.join(dir_output,'qvalues_first_moment_fitting_components.pdf'))
+                moment_fitting_first.plot_mixture_pdfs(os.path.join(dir_output,'qvalues_first_moment_fitting_mixture_pdf.pdf'))
             self.enrichment_obj.moment_fit_first = moment_fitting_first
 
         if self.enrichment_obj.type == 'cooperative':
@@ -275,6 +279,7 @@ class JOANA:
                     moment_fitting_second.goodness_of_fit(os.path.join(dir_output,'qvalues_second_moment_fitting_gof.txt'), plot_histograms=True)
                 if plot_components:
                     moment_fitting_second.plot_components_density(os.path.join(dir_output,'qvalues_second_moment_fitting_components.pdf'))
+                    moment_fitting_second.plot_mixture_pdfs(os.path.join(dir_output,'qvalues_second_moment_fitting_mixture_pdf.pdf'))
                 self.enrichment_obj.moment_fit_second = moment_fitting_second
 
 
