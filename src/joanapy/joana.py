@@ -19,6 +19,7 @@ from matplotlib.artist import Artist
 from matplotlib import gridspec
 from igraph import BoundingBox, Graph, palettes
 import seaborn as sns
+import time
 
 FILEPATH_JOANA_CLASS = os.path.realpath(__file__)
 FILENAME_JOANA = os.path.join(os.path.dirname(FILEPATH_JOANA_CLASS), 'joana_app', 'MonaConsoleApp.exe')
@@ -88,6 +89,7 @@ class JOANA:
         terms_filtered.to_csv(self.enrichment_obj.filename_terms, index=False, header=False)
         self.enrichment_obj.terms = terms_filtered
 
+        start_time = time.time()
 
         if self.enrichment_obj.type == 'single-species':
             if filename_moment_fit_first is None:
@@ -165,6 +167,8 @@ class JOANA:
                 filename_output,
                 str(int(prior_pA))])
 
+        time_needed = time.time() - start_time
+
         # load joana output in enrichment object
         if os.path.exists(filename_output):
             self.enrichment_obj.joana_output = pd.read_csv(filename_output, index_col='Terms')
@@ -172,6 +176,8 @@ class JOANA:
         # save enrichment_obj after JOANA run
         if save_enrichment_obj:
             self.enrichment_obj.save(filename_output.replace(filename_output_ending, 'pickle'))
+
+        return time_needed
     
 
 
@@ -251,7 +257,7 @@ class JOANA:
         terms_filtered.to_csv(self.enrichment_obj.filename_terms, index=False, header=False)
         self.enrichment_obj.terms = terms_filtered
 
-
+        start_time = time.time()
         #######################################################
         ################## Moment fitting #####################
         #######################################################
@@ -482,6 +488,8 @@ class JOANA:
                 filename_moment_fit_second,
                 filename_output_downregulated,
                 str(int(prior_pA))])
+        
+        time_needed = time.time() - start_time
 
         # load joana output in enrichment object
         if os.path.exists(filename_output_downregulated):
@@ -491,6 +499,7 @@ class JOANA:
         if save_enrichment_obj:
             self.enrichment_obj.save(os.path.join(dir_output, 'enrichment_obj_up_down_min%d_max%d.pickle' %(min_term_size, max_term_size)))
 
+        return time_needed
 
         
 
