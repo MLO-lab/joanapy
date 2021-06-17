@@ -285,11 +285,13 @@ class MOMENT_FITTING:
 
     def plot_mixture_pdfs(self, filename_output):
         x = np.arange(0., 1., 0.01)
-        pdf = beta.pdf
+        beta_active = beta(self.ab[0][0], self.ab[0][1])
+        beta_inactive_1 = beta(self.ab[1][0], self.ab[1][1])
+        beta_inactive_2 = beta(self.ab[2][0], self.ab[2][1])
 
-        pdf_active = pdf(x, self.ab[0][0], self.ab[0][0])
-        pdf_inactive_1 = pdf(x, self.ab[1][0], self.ab[1][1])
-        pdf_inactive_2 = pdf(x, self.ab[2][0], self.ab[2][1])
+        pdf_active = beta_active.pdf(x)
+        pdf_inactive_1 = beta_inactive_1.pdf(x)
+        pdf_inactive_2 = beta_inactive_2.pdf(x)
 
         plt.figure()
         plt.plot(x, pdf_active, label='Active', color='green')
