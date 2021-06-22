@@ -35,7 +35,7 @@ class JOANA:
     ################################################################# RUN JOANA ############################################################
     ########################################################################################################################################
 
-    def run(self, filename_output, filename_moment_fit_first=None, filename_moment_fit_second=None, tolerance_fitting=1E-5, steps_fitting=30000, verbose=True, goodness_of_fit=False, plot_components=False, prior_pA=1, min_term_size=0, max_term_size=100000, save_enrichment_obj=True):
+    def run(self, filename_output, filename_moment_fit_first=None, filename_moment_fit_second=None, tolerance_fitting=1E-5, steps_fitting=30000, verbose=True, goodness_of_fit=False, plot_components=False, prior_pA=1, min_term_size=0, max_term_size=100000, save_enrichment_obj=True, init='moment', second_comp_uniform=False):
         
         if not filename_output.endswith('.csv'):
             raise ValueError('The output filename needs to be a .csv file.')
@@ -98,7 +98,7 @@ class JOANA:
                 moment_fitting_first = MOMENT_FITTING(self.enrichment_obj.qvalues_first,
                                                     filename_moment_fit_first,
                                                     tolerance=tolerance_fitting, steps=steps_fitting)
-                moment_fitting_first.run(verbose=verbose)
+                moment_fitting_first.run(verbose=verbose, init=init, second_comp_uniform=second_comp_uniform)
                 if goodness_of_fit:
                     moment_fitting_first.goodness_of_fit(os.path.join(os.path.dirname(filename_output),'qvalues_first_moment_fitting_gof.txt'), plot_histograms=True)
                 if plot_components:
@@ -128,7 +128,7 @@ class JOANA:
                 moment_fitting_first = MOMENT_FITTING(self.enrichment_obj.qvalues_first[ind_not_missing_first.flatten()],
                                                     filename_moment_fit_first,
                                                     tolerance=tolerance_fitting, steps=steps_fitting)
-                moment_fitting_first.run(verbose=verbose)
+                moment_fitting_first.run(verbose=verbose, init=init, second_comp_uniform=second_comp_uniform)
                 if goodness_of_fit:
                     moment_fitting_first.goodness_of_fit(os.path.join(os.path.dirname(filename_output),'qvalues_first_moment_fitting_gof.txt'), plot_histograms=True)
                 if plot_components:
@@ -142,7 +142,7 @@ class JOANA:
                 ind_not_missing_second = self.enrichment_obj.missing_second.values == 0
                 moment_fitting_second = MOMENT_FITTING(self.enrichment_obj.qvalues_second[ind_not_missing_second.flatten()], filename_moment_fit_second,
                                                     tolerance=tolerance_fitting, steps=steps_fitting)
-                moment_fitting_second.run(verbose=verbose)
+                moment_fitting_second.run(verbose=verbose, init=init, second_comp_uniform=second_comp_uniform)
                 if goodness_of_fit:
                     moment_fitting_second.goodness_of_fit(os.path.join(os.path.dirname(filename_output),'qvalues_second_moment_fitting_gof.txt'), plot_histograms=True)
                 if plot_components:
@@ -186,7 +186,7 @@ class JOANA:
     ################################################################# RUN JOANA DIRECTIVE ##################################################
     ########################################################################################################################################
 
-    def run_directive(self, dir_output, statistical_direction_first, statistical_direction_second=None, filename_moment_fit_first=None, filename_moment_fit_second=None, tolerance_fitting=1E-5, steps_fitting=30000, verbose=True, goodness_of_fit=False, plot_components=False, prior_pA=1, min_term_size=0, max_term_size=100000, save_enrichment_obj=True):
+    def run_directive(self, dir_output, statistical_direction_first, statistical_direction_second=None, filename_moment_fit_first=None, filename_moment_fit_second=None, tolerance_fitting=1E-5, steps_fitting=30000, verbose=True, goodness_of_fit=False, plot_components=False, prior_pA=1, min_term_size=0, max_term_size=100000, save_enrichment_obj=True, init='moment', second_comp_uniform=False):
         
         if self.enrichment_obj.type == 'cooperative' and statistical_direction_second is None:
             raise ValueError('Please pass a statistical direction for the second species.')
@@ -266,7 +266,7 @@ class JOANA:
             # first species
             filename_moment_fit_first = os.path.join(dir_output,'qvalues_first_moment_fitting.txt')
             moment_fitting_first = MOMENT_FITTING(self.enrichment_obj.qvalues_first, filename_moment_fit_first, tolerance=tolerance_fitting, steps=steps_fitting)
-            moment_fitting_first.run(verbose=verbose)
+            moment_fitting_first.run(verbose=verbose, init=init, second_comp_uniform=second_comp_uniform)
             if goodness_of_fit:
                 moment_fitting_first.goodness_of_fit(os.path.join(dir_output,'qvalues_first_moment_fitting_gof.txt'), plot_histograms=True)
             if plot_components:
@@ -280,7 +280,7 @@ class JOANA:
                 filename_moment_fit_second = os.path.join(dir_output, 'qvalues_second_moment_fitting.txt')
                 ind_not_missing_second = self.enrichment_obj.missing_second.values == 0
                 moment_fitting_second = MOMENT_FITTING(self.enrichment_obj.qvalues_second[ind_not_missing_second.flatten()], filename_moment_fit_second, tolerance=tolerance_fitting, steps=steps_fitting)
-                moment_fitting_second.run(verbose=verbose)
+                moment_fitting_second.run(verbose=verbose, init=init, second_comp_uniform=second_comp_uniform)
                 if goodness_of_fit:
                     moment_fitting_second.goodness_of_fit(os.path.join(dir_output,'qvalues_second_moment_fitting_gof.txt'), plot_histograms=True)
                 if plot_components:

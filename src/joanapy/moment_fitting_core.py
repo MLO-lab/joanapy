@@ -13,12 +13,13 @@ import seaborn as sns
 class MOMENT_FITTING:
 
 
-    def __init__(self, data, resultpath, steps=1000, tolerance=1E-4, components=["falling", "unimodal", "rising"]):
+    def __init__(self, data, resultpath, steps=1000, tolerance=1E-4, components=["falling", "unimodal", "rising"], init_fct=None):
         self.data = data
         self.steps = steps
         self.tolerance = tolerance
         self.components = components
         self.resultpath = resultpath
+        self.init_fct = init_fct
 
     def __get_values(self, x, left, right):
         y = x[np.logical_and(x >= left, x <= right)]
@@ -57,6 +58,33 @@ class MOMENT_FITTING:
         if ab[-1][1] >= limit:  ab[-1] = (ab[-1][0], limit)
         return ab, pi
 
+    def __get_initialization_joana(self, x):
+        ab = list()
+        pi = list()
+
+        # ab.append([1., 100.])
+        # ab.append([100., 1.])
+        # ab.append([100., 1.])
+        # pi.append(0.33)
+        # pi.append(0.33)
+        # pi.append(1.-0.66)
+
+        mean, variance, temp_pi = self.__get_values(x, 0., 0.1)
+        pi.append(temp_pi)
+        ab.append(self.__ab_from_mv(mean, variance))
+        mean, variance, temp_pi = self.__get_values(x, 0.1, 0.9)
+        pi.append(temp_pi)
+        ab.append(self.__ab_from_mv(mean, variance))
+        mean, variance, temp_pi = self.__get_values(x, 0.9, 1.)
+        pi.append(temp_pi)
+        ab.append(self.__ab_from_mv(mean, variance))
+        
+        pi = np.asarray(pi)
+        pi = pi / pi.sum()
+
+        return ab, pi
+
+
     def __estimate_mixture(self, x, init, steps=1000, tolerance=1E-5, verbose=False):
         """
         estimate a beta mixture model from the given data x
@@ -83,6 +111,54 @@ class MOMENT_FITTING:
                     v = 1 / 12  # uniform
                     ab[j] = (1, 1)  # uniform
                     assert pij == 0.0
+                else:
+                    assert np.isfinite(m) and np.isfinite(v), (j, m, v, pij)
+                    ab[j] = self.__ab_from_mv(m, v)
+                pi[j] = pij / n
+            delta = self.__get_delta(ab, abold, pi, piold)
+            if delta < tolerance:
+                break
+            if verbose:
+                if step % 100 == 0:
+                    print((step, delta,
+                           ("{:.5f}".format(round(ab[0][0], 5)),
+                           "{:.5f}".format(round(ab[0][1], 5)),
+                           "{:.5f}".format(round(pi[0], 5))),
+                           ("{:.5f}".format(round(ab[1][0], 5)),
+                           "{:.5f}".format(round(ab[1][1], 5)),
+                           "{:.5f}".format(round(pi[1], 5))),
+                           ("{:.5f}".format(round(ab[2][0], 5)),
+                           "{:.5f}".format(round(ab[2][1], 5)),
+                           "{:.5f}".format(round(pi[2], 5)))))
+        usedsteps = step + 1
+        return (ab, pi, usedsteps)
+
+    def __estimate_mixture_uniform(self, x, init, steps=1000, tolerance=1E-5, verbose=False):
+        """
+        estimate a beta mixture model from the given data x
+        with the given number of components and component types
+        """
+        (ab, pi) = init
+        n, ncomponents = len(x), len(ab)
+
+        for step in count():
+            if step >= steps:
+                break
+            abold = list(ab)
+            piold = pi[:]
+            # E-step: compute component memberships for each x
+            w = self.__get_weights(x, ab, pi)
+            # compute component means and variances and parameters
+            for j in range(ncomponents):
+                wj = w[:, j]
+                pij = np.sum(wj)
+                m = np.dot(wj, x) / pij
+                v = np.dot(wj, (x - m) ** 2) / pij
+                if np.isnan(m) or np.isnan(v) or j == 1:
+                    m = 0.5;
+                    v = 1 / 12  # uniform
+                    ab[j] = (1, 1)  # uniform
+                    # assert pij == 0.0
                 else:
                     assert np.isfinite(m) and np.isfinite(v), (j, m, v, pij)
                     ab[j] = self.__ab_from_mv(m, v)
@@ -135,6 +211,17 @@ class MOMENT_FITTING:
         eb = max(self.__relerror(b, bo) for (_, b), (_, bo) in zip(ab, abold))
         return max(epi, ea, eb)
 
+    def loglikelihood(self):
+        beta_active = beta(self.ab[0][0], self.ab[0][1])
+        beta_inactive_1 = beta(self.ab[1][0], self.ab[1][1])
+        beta_inactive_2 = beta(self.ab[2][0], self.ab[2][1])
+        
+        llh = 0
+        for x in self.data:
+            llh += np.log(self.pi[0]*beta_active.pdf(x) + self.pi[1]*beta_inactive_1.pdf(x) + self.pi[2]*beta_inactive_2.pdf(x))
+            
+        return llh
+
     def __relerror(self, x, y):
         if x == y:  return 0.0
         return abs(x - y) / max(abs(x), abs(y))
@@ -149,13 +236,34 @@ class MOMENT_FITTING:
         phi = m * (1 - m) / v - 1  # z = 2 for uniform distribution
         return (phi * m, phi * (1 - m))  # a = b = 1 for uniform distribution
 
-    def __estimate(self, x, components, steps=1000, tolerance=1E-4, verbose=False):
-        init = self.__get_initialization(x, len(components))
-        (ab, pi, usedsteps) = self.__estimate_mixture(x, init, steps=steps, tolerance=tolerance, verbose=verbose)
+    def __estimate(self, x, components, steps=1000, tolerance=1E-4, verbose=False, init='moment', second_comp_uniform=False):
+        if self.init_fct is None:
+            if init == 'moment':
+                init = self.__get_initialization(x, len(components))
+            elif init == 'joana':
+                init = self.__get_initialization_joana(x)
+        else:
+            init = self.init_fct()
+       
+        print(('init:',
+                ("{:.5f}".format(round(init[0][0][0], 5)),
+                "{:.5f}".format(round(init[0][0][1], 5)),
+                "{:.5f}".format(round(init[1][0], 5))),
+                ("{:.5f}".format(round(init[0][1][0], 5)),
+                "{:.5f}".format(round(init[0][1][1], 5)),
+                "{:.5f}".format(round(init[1][1], 5))),
+                ("{:.5f}".format(round(init[0][2][0], 5)),
+                "{:.5f}".format(round(init[0][2][1], 5)),
+                "{:.5f}".format(round(init[1][2], 5)))))
+
+        if second_comp_uniform:
+            (ab, pi, usedsteps) = self.__estimate_mixture_uniform(x, init, steps=steps, tolerance=tolerance, verbose=verbose)
+        else:
+            (ab, pi, usedsteps) = self.__estimate_mixture(x, init, steps=steps, tolerance=tolerance, verbose=verbose)
         return (ab, pi, usedsteps)
 
-    def run(self, verbose=False):
-        (ab, pi, us) = self.__estimate(self.data, self.components, steps=self.steps, tolerance=self.tolerance, verbose=verbose)
+    def run(self, verbose=False, init='moment', second_comp_uniform=False):
+        (ab, pi, us) = self.__estimate(self.data, self.components, steps=self.steps, tolerance=self.tolerance, verbose=verbose, init=init, second_comp_uniform=second_comp_uniform)
         self.w = self.__get_weights(self.data, ab, pi)
         self.assignments = np.argmax(self.w, axis=1)
         self.ab = ab
@@ -176,7 +284,8 @@ class MOMENT_FITTING:
             list_fit.append(ab[i][1])
             list_fit.append(pi[i])
 
-        pd.DataFrame(list_fit).to_csv(self.resultpath, header=False, index=False)
+        if not self.resultpath is None:
+            pd.DataFrame(list_fit).to_csv(self.resultpath, header=False, index=False)
 
     def __ecdf(self, sample):
 
