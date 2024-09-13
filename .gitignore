@@ -1,0 +1,10 @@
+src/build/
+build/
+src/dist/
+src/joanapy/__pycache__/
+src/joanapy/.DS_Store
+src/README.ipynb
+joanapy/__pycache__/
+.DS_Store
+joanapy.egg-info/
+joana_app/
