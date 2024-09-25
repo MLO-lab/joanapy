@@ -26,7 +26,7 @@ Additionally, it provides a barplot showing the goodness of fit for the observed
 JOANA offers a PDF containing barplots that display enriched pathways with probabilities exceeding 0.5 for multi-omics (cooperative) data. It also shows pathways for each single-omics modality with probabilities >= 0.5 that do not appear in the multi-omics analysis.
 
 <p align="center">
-    <img src="./results/barPlotProb.png" alt="Pathway Probabilities" width="600"/>
+    <img src="./results/barplotProb.png" alt="Pathway Probabilities" width="600"/>
 </p>
 
 It also includes a graph depicting the relationships between pathways. The color of the nodes indicates the probability of pathway activity, the thickness of the edges shows the degree of interconnectedness between pathways (i.e., how many common genes they share), and the size of the nodes reflects the size of the pathways.
