@@ -26,11 +26,11 @@ after installing joanapy on joana environment run JOANA through run-joana functi
 
 ```
 run-joana [-o omics1.txt] [-o2 omics2.txt] [-p pathwayfile.gmt] [-d input-output-directory-path] [-m min-num-genes]
--o input file-name. This file is a two-column tab delimited the first column is gene-name and second column signifficant score (e.g. q-values) coresponde to that gene.
--o2 input file-name in the case of multi-omics the format of this file is also the same as the first file.
--p the file-name of 'gmt' file which contains biological pathways that are going to test for enrichment.
--d specify the path that all the input files are in. Also this path specifies the path of result directory of JOANA.
--m its a number between [0,1) which specified by client (default value is 0). '-m 0.5' means JOANA consider pathways which atleast 50% of its genes have measurments.   
+-o input file. This file is a two-column tab delimited the first column is gene-name and second column signifficant score (e.g. q-values) coresponde to that gene.
+-o2 input file in the case of multi-omics the format of this file is also the same as the first file.
+-p the file of 'gmt' file which contains biological pathways that are going to test for enrichment.
+-m its a number between [0,1) which specified by client (default value is 0). '-m 0.5' means 
+-d This path specifies the path of result directory of JOANA.
 
 ```
 
@@ -48,16 +48,16 @@ AADAC  0.881216487254285
 
 The 'gmt' file could be downloaded from msigDB or any other desired biological pathway file with gmt format.
 
-To execute JAOAN on single-omics data if you are already in the directory of input data, the command line would be:
+
 
 ```
-run-joana -o omics1.txt -p pathway.gmt -d ./ -m 0.7
+run-joana -o .../omics1.txt -p .../pathway.gmt -m 0.7 -d .../dirOutputs/
 
 ```
 And to execute JAOAN on multi-omics data if you are already in the directory of input data, the command line would be:
 
 ```
-run-joana -o omics1.txt -o2 omics2.txt -p pathway.gmt -d ./ -m 0.7
+run-joana -o .../omics1.txt -o2 .../omics2.txt -p pathway.gmt -m 0.7 -d .../dirOutputs/
 
 ```
 Note:
