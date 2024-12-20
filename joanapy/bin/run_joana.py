@@ -11,11 +11,11 @@ import argparse
 
 def main():
     parser = argparse.ArgumentParser(description='Run joana_single or joana_Cooperative based on the options provided')
-    parser.add_argument('-o', '--omics1', help='File name for omics1')
-    parser.add_argument('-o2', '--omics2', help='File name for omics2 (for cooperative mode)')
-    parser.add_argument('-p', '--pathway', help='File name for pathway.gmt file')
-    parser.add_argument('-d', '--dir', help='Path to input file directories and saving the results')
+    parser.add_argument('-o', '--omics1', help='Input file for omics1')
+    parser.add_argument('-o2', '--omics2', help='Input file for omics2 (for cooperative mode)')
+    parser.add_argument('-p', '--pathway', help='Input file for pathway.gmt file')
     parser.add_argument('-m', '--min_term_utilization', type=float,default=0.0, help='it removes pathways from gmt file if Minimum term utilization does not pass. It removes pathways which has atleast min_term_utilization measured genes inside')
+    parser.add_argument('-d', '--dir', help='Path to output directory')
     args = parser.parse_args()
 
     # Determine which function to call based on the options provided
@@ -27,8 +27,8 @@ def main():
 def run_joana_single(filename_omics1,filename_pathway,dir,min_term_utilization=0.0):
     dir = os.path.normpath(dir)
     filename_output_single = os.path.join(dir,'results'+str(min_term_utilization), 'ResultSingle.csv')
-    filename_assignment_matrix_gmt=os.path.join(dir,filename_pathway)
-    filename_qvalues_first= os.path.join(dir,filename_omics1)
+    filename_assignment_matrix_gmt=os.path.normpath(filename_pathway)
+    filename_qvalues_first= os.path.normpath(filename_omics1)
     #filename_qvalues_second= path+'omics2noHead.txt'
     
     min_term_size = 5
@@ -38,8 +38,12 @@ def run_joana_single(filename_omics1,filename_pathway,dir,min_term_utilization=0
     plot_components = True
     signif_threshold=0.1
     quantile=0.95
-    if not os.path.exists(os.path.join(dir,'temp')):
-        os.makedirs(os.path.join(dir,'temp'))
+    #if not os.path.exists(os.path.join(dir,'temp')):
+    #    os.makedirs(os.path.join(dir,'temp'))
+    tempdir=os.path.join(dir,'temp')
+    if os.path.isdir(tempdir):
+        os.rmdir(tempdir)
+    os.makedirs(os.path.join(dir,'temp'))
     
     res=data_preproccessing(filename_qvalues_first)
     
@@ -89,11 +93,15 @@ def run_joana_single(filename_omics1,filename_pathway,dir,min_term_utilization=0
 
 
 def run_joana_cooperative(filename_omics1,filename_omics2,filename_pathway,dir,min_term_utilization=0.0):
-    path = os.path.normpath(dir)
-    filename_output_cooperative = os.path.join(dir,'results'+str(min_term_utilization), 'ResultCooperative.csv')
-    filename_assignment_matrix_gmt=os.path.join(dir,filename_pathway)
-    filename_qvalues_first= os.path.join(dir,filename_omics1)
-    filename_qvalues_second= os.path.join(dir,filename_omics2)
+    dir = os.path.normpath(dir)
+    outdir=os.path.join(dir,'results'+str(min_term_utilization))
+    if os.path.isdir(outdir):
+        os.rmdir(outdir)
+    filename_output_cooperative = os.path.join(outdir, 'ResultCooperative.csv')
+    #filename_output_cooperative = os.path.join(dir,'results'+str(min_term_utilization), 'ResultCooperative.csv')
+    filename_assignment_matrix_gmt=os.path.normpath(filename_pathway)
+    filename_qvalues_first= os.path.normpath(filename_omics1)
+    filename_qvalues_second= os.path.normpath(filename_omics2)
     
     
     min_term_size = 5
@@ -103,9 +111,13 @@ def run_joana_cooperative(filename_omics1,filename_omics2,filename_pathway,dir,m
     plot_components = True
     signif_threshold=0.1
     quantile=0.95
-    if not os.path.exists(os.path.join(dir,'temp')):
-        os.makedirs(os.path.join(dir,'temp'))
-    
+    #if not os.path.exists(os.path.join(dir,'temp')):
+    #    os.makedirs(os.path.join(dir,'temp'))
+    tempdir=os.path.join(dir,'temp')
+    if os.path.isdir(tempdir):
+        os.rmdir(tempdir)
+    os.makedirs(os.path.join(dir,'temp'))
+
     res=data_preproccessing(filename_qvalues_first,filename_qvalues_second=filename_qvalues_second)
     #Cooperative Preproccessing
     if(res[0]=="coop"):
