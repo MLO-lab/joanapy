@@ -8,6 +8,7 @@ import os
 import pandas as pd
 import numpy as np
 import argparse
+import shutil
 
 def main():
     parser = argparse.ArgumentParser(description='Run joana_single or joana_Cooperative based on the options provided')
@@ -26,7 +27,11 @@ def main():
 
 def run_joana_single(filename_omics1,filename_pathway,dir,min_term_utilization=0.0):
     dir = os.path.normpath(dir)
-    filename_output_single = os.path.join(dir,'results'+str(min_term_utilization), 'ResultSingle.csv')
+    outdir=os.path.join(dir,'results'+str(min_term_utilization))
+    if os.path.isdir(outdir):
+        shutil.rmtree(outdir)
+    
+    filename_output_single = os.path.join(outdir, 'ResultSingle.csv')
     filename_assignment_matrix_gmt=os.path.normpath(filename_pathway)
     filename_qvalues_first= os.path.normpath(filename_omics1)
     #filename_qvalues_second= path+'omics2noHead.txt'
@@ -42,7 +47,7 @@ def run_joana_single(filename_omics1,filename_pathway,dir,min_term_utilization=0
     #    os.makedirs(os.path.join(dir,'temp'))
     tempdir=os.path.join(dir,'temp')
     if os.path.isdir(tempdir):
-        os.rmdir(tempdir)
+        shutil.rmtree(tempdir)
     os.makedirs(os.path.join(dir,'temp'))
     
     res=data_preproccessing(filename_qvalues_first)
@@ -96,7 +101,7 @@ def run_joana_cooperative(filename_omics1,filename_omics2,filename_pathway,dir,m
     dir = os.path.normpath(dir)
     outdir=os.path.join(dir,'results'+str(min_term_utilization))
     if os.path.isdir(outdir):
-        os.rmdir(outdir)
+        shutil.rmtree(outdir)
     filename_output_cooperative = os.path.join(outdir, 'ResultCooperative.csv')
     #filename_output_cooperative = os.path.join(dir,'results'+str(min_term_utilization), 'ResultCooperative.csv')
     filename_assignment_matrix_gmt=os.path.normpath(filename_pathway)
@@ -115,7 +120,7 @@ def run_joana_cooperative(filename_omics1,filename_omics2,filename_pathway,dir,m
     #    os.makedirs(os.path.join(dir,'temp'))
     tempdir=os.path.join(dir,'temp')
     if os.path.isdir(tempdir):
-        os.rmdir(tempdir)
+        shutil.rmtree(tempdir)
     os.makedirs(os.path.join(dir,'temp'))
 
     res=data_preproccessing(filename_qvalues_first,filename_qvalues_second=filename_qvalues_second)
