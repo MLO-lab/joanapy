@@ -10,10 +10,11 @@ def read_file(file_path):
     if file_extension == '.csv':
         # Read CSV file
         df = pd.read_csv(file_path, header=None, names=['geneSymbol', 'qval'])
-    else:
+    elif file_extension =='.txt':
         # Read text file
         df = pd.read_csv(file_path, sep='\s+', header=None, names=['geneSymbol', 'qval'])
-    
+    elif file_extension=='.tsv':
+        df = pd.read_csv(file_path, sep='\t', header=None, names=['geneSymbol', 'qval'])    
     # Convert the second column to numeric values if possible
     df['qval'] = pd.to_numeric(df['qval'], errors='coerce')
     
