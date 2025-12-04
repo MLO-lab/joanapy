@@ -29,7 +29,7 @@ run-joana [-o omics1.txt] [-o2 omics2.txt] [-p pathwayfile.gmt] [-d input-output
 -o input file. This file is a two-column tab delimited the first column is gene-name and second column signifficant score (e.g. q-values) coresponde to that gene.
 -o2 input file in the case of multi-omics the format of this file is also the same as the first file.
 -p the file of 'gmt' file which contains biological pathways that are going to test for enrichment.
--m its a number between [0,1) which specified by client (default value is 0). '-m 0.5' means 
+-m its a number between [0,1) which specified by client (default value is 0). '-m 0.5' means JOANA consider pathways which atleast 50% of its genes have measurments.
 -d This path specifies the path of result directory of JOANA.
 
 ```
