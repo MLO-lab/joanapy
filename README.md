@@ -83,6 +83,13 @@ AACS  0.230709278931887
 AADAC  0.881216487254285
 ```
 
+Example (CSV format)
+```
+A2ML1,0.025202476125022
+A3GALT2,0.878666355638669
+A4GALT,0.983155339235838
+```
+
 The 'gmt' file could be downloaded from msigDB or any other desired biological pathway file with gmt format.
 
 
