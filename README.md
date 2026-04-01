@@ -39,6 +39,7 @@ Format must be the same as -o.
 
 -p <pathwayfile.gmt>
 Path to the pathway file in GMT format, containing biological pathways to be tested for enrichment.
+
 -m <min_num_genes> (optional)
 A value in the range [0, 1) (default: 0).
 Defines the minimum proportion of genes in a pathway that must have measurements.
