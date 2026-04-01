@@ -55,9 +55,24 @@ Use full paths (e.g., /home/user/data/file.txt) or relative paths (e.g., data/fi
 The -o2 parameter is only required for multi-omics analysis.
 
 
+Input file format (-o and -o2)
+The input files specified by -o and -o2 must contain two columns with the following structure:
+1. Gene identifier (e.g., gene symbol)
+2. Numeric score (e.g., q-value or p-value)
 
-The input files -o and -o2 should be a two-column tab-delimited file (make sure files don't contain any header) with the following format:
+⚠️ Important:
+- Files must not contain a header row
+- Only the first two columns are used
+- The second column must contain numeric values
 
+Supported file types
+JOANA supports the following formats:
+- .txt → whitespace-separated (spaces or tabs)
+- .tsv → tab-separated
+- .csv → comma-separated
+
+
+Example (TXT / TSV format)
 ```
 A2ML1  0.025202476125022
 A3GALT2  0.878666355638669
