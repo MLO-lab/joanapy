@@ -71,7 +71,7 @@ The 'gmt' file could be downloaded from msigDB or any other desired biological p
 run-joana -o /path/to/omics1.txt -p /path/to/pathway.gmt -m 0.7 -d /path/to/dirOutputs/
 
 ```
-And to execute JAOAN on multi-omics data if you are already in the directory of input data, the command line would be:
+And to execute JAOAN on multi-omics data the command line would be:
 
 ```
 run-joana -o /path/to/omics1.txt -o2 /path/to/omics2.txt -p /path/to/pathway.gmt -m 0.7 -d /path/to/dirOutputs/
