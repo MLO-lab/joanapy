@@ -25,12 +25,28 @@ pip install .
 after installing joanapy on joana environment run JOANA through run-joana function.
 
 ```
-run-joana [-o omics1.txt] [-o2 omics2.txt] [-p pathwayfile.gmt] [-d input-output-directory-path] [-m min-num-genes]
--o input file. This file is a two-column tab delimited the first column is gene-name and second column signifficant score (e.g. q-values) coresponde to that gene.
--o2 input file in the case of multi-omics the format of this file is also the same as the first file.
--p the file of 'gmt' file which contains biological pathways that are going to test for enrichment.
--m its a number between [0,1) which specified by client (default value is 0). '-m 0.5' means JOANA consider pathways which atleast 50% of its genes have measurments.
--d This path specifies the path of result directory of JOANA.
+run-joana -o <omics1.txt> [-o2 <omics2.txt>] -p <pathwayfile.gmt> -d <output_directory> [-m <min_num_genes>]
+
+-o <omics1.txt> 
+Path to the primary omics input file.
+The file must be a two-column tab-delimited file:
+1. Gene name
+2. Significance score (e.g., q-value) corresponding to the gene
+
+-o2 <omics2.txt> (optional)
+Path to the second omics input file for multi-omics analysis.
+Format must be the same as -o.
+
+-p <pathwayfile.gmt>
+Path to the pathway file in GMT format, containing biological pathways to be tested for enrichment.
+-m <min_num_genes> (optional)
+A value in the range [0, 1) (default: 0).
+Defines the minimum proportion of genes in a pathway that must have measurements.
+Example:
+-m 0.5 → Only pathways where at least 50% of genes have measurements will be considered.
+
+-d <output_directory>
+Path to the directory where JOANA results will be saved.
 
 ```
 
