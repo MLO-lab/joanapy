@@ -50,6 +50,11 @@ Example:
 Path to the directory where JOANA results will be saved.
 
 ```
+Note:
+Use full paths (e.g., /home/user/data/file.txt) or relative paths (e.g., data/file.txt) depending on your working directory.
+The -o2 parameter is only required for multi-omics analysis.
+
+
 
 The input files -o and -o2 should be a two-column tab-delimited file (make sure files don't contain any header) with the following format:
 
