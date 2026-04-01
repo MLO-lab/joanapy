@@ -57,7 +57,7 @@ run-joana -o .../omics1.txt -p .../pathway.gmt -m 0.7 -d .../dirOutputs/
 And to execute JAOAN on multi-omics data if you are already in the directory of input data, the command line would be:
 
 ```
-run-joana -o .../omics1.txt -o2 .../omics2.txt -p pathway.gmt -m 0.7 -d .../dirOutputs/
+run-joana -o .../omics1.txt -o2 .../omics2.txt -p .../pathway.gmt -m 0.7 -d .../dirOutputs/
 
 ```
 Note:
