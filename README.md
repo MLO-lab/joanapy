@@ -107,9 +107,13 @@ run-joana -o /path/to/omics1.txt -o2 /path/to/omics2.txt -p /path/to/pathway.gmt
 Note:
 When dealing with multi-omics data, the '-o' input file serves as the reference file, and missing values in the second modality '-o2' are handled based on the reference data-modality. It's crucial to select the file with more gene measurements as the reference, as this provides better data integrity and completeness.
 
-## Example
-An example for how to run JOANA with joanapy can be found in the joanapy/tests folder.
+## Example with Sample Data
+You can quickly test the tool using the included sample data:
 
+```
+run-joana -o ./sample_data/rna.csv -o2 ./sample_data/prot.csv -p ./sample_data/h.all.v6.2.symbols.gmt -m 0.7 -d ./dirOutputs/
+
+```
 ## Uninstall joanapy
 The package can be uninstalled with the following command:
 
