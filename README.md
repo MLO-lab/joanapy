@@ -111,7 +111,7 @@ When dealing with multi-omics data, the '-o' input file serves as the reference 
 You can quickly test the tool using the included sample data:
 
 ```
-run-joana -o ./sample_data/rna.csv -o2 /sample_data/prot.csv -p /sample_data/h.all.v6.2.symbols.gmt -m 0.7 -d ./dirOutputs/
+run-joana -o ./sample_data/rna.csv -o2 ./sample_data/prot.csv -p ./sample_data/h.all.v6.2.symbols.gmt -m 0.7 -d ./dirOutputs/
 
 ```
 ## Uninstall joanapy
