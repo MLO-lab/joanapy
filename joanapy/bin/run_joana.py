@@ -76,8 +76,8 @@ def run_joana_single(filename_omics1,filename_pathway,dir,min_term_utilization=0
     # read in first species
     gene_ids = pd.read_table(filename_gene_ids, header=None)
     print(min_term_size, max_term_size, min_term_utilization)
-    filename_terms = os.path.join(dir,'temp','Human_GOALL_with_GO_iea_March_01_2021_symbol_terms_utilization' +str(min_term_size)+'_'+ str(max_term_size)+'_'+ str(min_term_utilization)+'.txt')
-    filename_assignment_matrix = os.path.join(dir,'temp','Human_GOALL_with_GO_iea_March_01_2021_symbol_utilization'+ str(min_term_size)+'_'+ str(max_term_size)+'_'+ str(min_term_utilization)+'.txt')
+    filename_terms = os.path.join(dir,'temp','symbol_terms_utilization' +str(min_term_size)+'_'+ str(max_term_size)+'_'+ str(min_term_utilization)+'.txt')
+    filename_assignment_matrix = os.path.join(dir,'temp','symbol_utilization'+ str(min_term_size)+'_'+ str(max_term_size)+'_'+ str(min_term_utilization)+'.txt')
     if not os.path.exists(os.path.dirname(filename_assignment_matrix)):
         os.makedirs(os.path.dirname(filename_assignment_matrix))
 
@@ -153,8 +153,8 @@ def run_joana_cooperative(filename_omics1,filename_omics2,filename_pathway,dir,m
     # read in first species
     gene_ids = pd.read_table(filename_gene_ids, header=None)
     print(min_term_size, max_term_size, min_term_utilization)
-    filename_terms = os.path.join(dir,'temp','Human_GOALL_with_GO_iea_March_01_2021_symbol_terms_utilization' +str(min_term_size)+'_'+ str(max_term_size)+'_'+ str(min_term_utilization)+'.txt')
-    filename_assignment_matrix = os.path.join(dir,'temp','Human_GOALL_with_GO_iea_March_01_2021_symbol_utilization'+ str(min_term_size)+'_'+ str(max_term_size)+'_'+ str(min_term_utilization)+'.txt')
+    filename_terms = os.path.join(dir,'temp','symbol_terms_utilization' +str(min_term_size)+'_'+ str(max_term_size)+'_'+ str(min_term_utilization)+'.txt')
+    filename_assignment_matrix = os.path.join(dir,'temp','symbol_utilization'+ str(min_term_size)+'_'+ str(max_term_size)+'_'+ str(min_term_utilization)+'.txt')
     if not os.path.exists(os.path.dirname(filename_assignment_matrix)):
         os.makedirs(os.path.dirname(filename_assignment_matrix))
 
