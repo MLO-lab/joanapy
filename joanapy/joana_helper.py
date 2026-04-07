@@ -7,16 +7,39 @@ def read_file(file_path):
     # Check the file extension
     _, file_extension = os.path.splitext(file_path)
     
-    if file_extension == '.csv':
-        # Read CSV file
-        df = pd.read_csv(file_path, header=None, names=['geneSymbol', 'qval'])
-    elif file_extension =='.txt':
+    if file_extension not in ['.txt', '.tsv']:
+        raise ValueError(
+            f"Unsupported file type '{file_extension}' for file '{file_path}'. "
+            f"Only '.txt' and '.tsv' files are supported."
+        )
+
+    try:
+        if file_extension == '.txt':
+            df = pd.read_csv(file_path, sep=r'\s+', header=None, names=['geneSymbol', 'qval'])
+        elif file_extension == '.tsv':
+            df = pd.read_csv(file_path, sep='\t', header=None, names=['geneSymbol', 'qval'])
+
+    except pd.errors.ParserError as e:
+        raise ValueError(
+            f"Error reading file '{file_path}'. Ensure it is a properly formatted "
+            f"two-column file (geneSymbol, q-value) without extra columns.\n"
+            f"Original error: {str(e)}"
+        )
+    """
+    if file_extension =='.txt':
         # Read text file
         df = pd.read_csv(file_path, sep='\s+', header=None, names=['geneSymbol', 'qval'])
     elif file_extension=='.tsv':
         df = pd.read_csv(file_path, sep='\t', header=None, names=['geneSymbol', 'qval'])    
-
+    """
+    if df.shape[1] != 2:
+        raise ValueError(
+            f"Input file '{file_path}' must have exactly 2 columns: "
+            f"gene identifier and q-value. Found {df.shape[1]} columns."
+        )
     
+    # Convert q-values to numeric
+    df['qval'] = pd.to_numeric(df['qval'], errors='coerce')
     # Convert the second column to numeric values if possible
     df['qval'] = pd.to_numeric(df['qval'], errors='coerce')
     
