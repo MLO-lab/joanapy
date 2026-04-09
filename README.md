@@ -106,6 +106,14 @@ You can quickly test the tool using the included sample data:
 run-joana -o ./sample_data/rna.txt -o2 ./sample_data/prot.txt -p ./sample_data/h.all.v6.2.symbols.gmt -m 0.7 -d ./dirOutputs/
 
 ```
+## Original Data
+For evaluation of JOANA on real data we used supplementary Excel files from:
+[lung adenocarcinoma dataset] (https://www.cell.com/cms/10.1016/j.cell.2020.06.013/attachment/ab6fcc71-22e2-4ce9-9947-926fba367bd6/mmc2.xlsx)
+[Hot tumor dataset](https://ars.els-cdn.com/content/image/1-s2.0-S0092867420314513-mmc2.xlsx)
+[Myeloma (Single-cell transcriptomics dataset)](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE117156)
+[coding and non-coding mutations](http://docs.icgc.org/pcawg) unfortunatly it is not accessible anymore
+[LDC mouse hepatocyte dataset]()
+
 ## Uninstall joanapy
 The package can be uninstalled with the following command:
 
