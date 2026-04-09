@@ -106,19 +106,24 @@ You can quickly test the tool using the included sample data:
 run-joana -o ./sample_data/rna.txt -o2 ./sample_data/prot.txt -p ./sample_data/h.all.v6.2.symbols.gmt -m 0.7 -d ./dirOutputs/
 
 ```
-## Original Data
-For evaluation of JOANA on real data we used supplementary Excel files from:
+## Data Sources
 
-[Lung adenocarcinoma dataset](https://www.sciencedirect.com/science/article/pii/S0092867420307443?via%3Dihub#app2)(Table S2)<br>
+For the evaluation of JOANA on real data, we used supplementary Excel files from the following studies:
 
-[Hot tumor dataset](https://www.sciencedirect.com/science/article/pii/S0092867420314513?via%3Dihub#app2)(Table S2)
+[Lung adenocarcinoma dataset](https://www.sciencedirect.com/science/article/pii/S0092867420307443?via%3Dihub#app2) (Table S2)<br>
+[Hot tumor dataset](https://www.sciencedirect.com/science/article/pii/S0092867420314513?via%3Dihub#app2) (Table S2)<br>
+[Myeloma (single-cell transcriptomics dataset)](https://www.nature.com/articles/s41591-018-0269-2#data-availability) (GSE117156)<br>
+[Coding and non-coding mutations dataset](http://docs.icgc.org/pcawg) *(currently not accessible)*<br>
+LDC mouse hepatocyte dataset
 
-[Myeloma (Single-cell transcriptomics dataset)](https://www.nature.com/articles/s41591-018-0269-2#data-availability)(GSE117156)
+---
 
-[coding and non-coding mutations](http://docs.icgc.org/pcawg) unfortunatly it is not accessible anymore
+## Data Preprocessing
 
-[LDC mouse hepatocyte dataset]()
+We provide the R scripts used for preprocessing each dataset in the `scripts/` folder.
 
+Due to licensing restrictions, we do not redistribute the original datasets.  
+Please download the data from the sources above and run the preprocessing scripts to reproduce the inputs used in JOANA.
 ## Uninstall joanapy
 The package can be uninstalled with the following command:
 
