@@ -109,10 +109,14 @@ run-joana -o ./sample_data/rna.txt -o2 ./sample_data/prot.txt -p ./sample_data/h
 ## Original Data
 For evaluation of JOANA on real data we used supplementary Excel files from:
 
-[lung adenocarcinoma dataset](https://www.sciencedirect.com/science/article/pii/S0092867420307443?via%3Dihub#app2)(Table S2)
+[Lung adenocarcinoma dataset](https://www.sciencedirect.com/science/article/pii/S0092867420307443?via%3Dihub#app2)(Table S2)
+
 [Hot tumor dataset](https://www.sciencedirect.com/science/article/pii/S0092867420314513?via%3Dihub#app2)(Table S2)
+
 [Myeloma (Single-cell transcriptomics dataset)](https://www.nature.com/articles/s41591-018-0269-2#data-availability)(GSE117156)
+
 [coding and non-coding mutations](http://docs.icgc.org/pcawg) unfortunatly it is not accessible anymore
+
 [LDC mouse hepatocyte dataset]()
 
 ## Uninstall joanapy
