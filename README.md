@@ -110,7 +110,7 @@ run-joana -o ./sample_data/rna.txt -o2 ./sample_data/prot.txt -p ./sample_data/h
 
 For the evaluation of JOANA on real data, we used supplementary Excel files from the following studies:
 
-[Lung adenocarcinoma dataset](https://www.sciencedirect.com/science/article/pii/S0092867420307443?via%3Dihub#app2) (Table S2)<br>
+[Lung adenocarcinoma dataset](https://www.sciencedirect.com/science/article/pii/S0092867420307443?via%3Dihub#app2) (Table S2, Table S3)<br>
 [Hot tumor dataset](https://www.sciencedirect.com/science/article/pii/S0092867420314513?via%3Dihub#app2) (Table S2)<br>
 [Myeloma (single-cell transcriptomics dataset)](https://www.nature.com/articles/s41591-018-0269-2#data-availability) (GSE117156)<br>
 [Coding and non-coding mutations dataset](http://docs.icgc.org/pcawg) *(currently not accessible)*<br>
