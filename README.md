@@ -120,7 +120,7 @@ LDC mouse hepatocyte dataset
 
 ## Data Preprocessing
 
-We provide the R scripts used for preprocessing each dataset in the `scripts/` folder.
+We provide the scripts used for preprocessing each dataset in the `scripts/` folder.
 
 Due to licensing restrictions, we do not redistribute the original datasets.  
 Please download the data from the sources above and run the preprocessing scripts to reproduce the inputs used in JOANA.
