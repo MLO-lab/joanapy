@@ -114,7 +114,7 @@ For the evaluation of JOANA on real data, we used supplementary Excel files from
 [Hot tumor dataset](https://www.sciencedirect.com/science/article/pii/S0092867420314513?via%3Dihub#app2) (Table S2)<br>
 [Myeloma (single-cell transcriptomics dataset)](https://www.nature.com/articles/s41591-018-0269-2#data-availability) (GSE117156)<br>
 [Coding and non-coding mutations dataset](http://docs.icgc.org/pcawg) *(currently not accessible)*<br>
-LDC mouse hepatocyte dataset
+[LDC mouse hepatocyte dataset](https://pmc.ncbi.nlm.nih.gov/articles/PMC10324225/#sec27) (13072_2023_504_MOESM3_ESM.bed,13072_2023_504_MOESM2_ESM.xlsx)
 
 ---
 
