@@ -3,9 +3,33 @@ import statsmodels.stats
 from statsmodels.stats import multitest
 import biomart
 import mygene
+from pybedtools import BedTool
+import GTF_Processing
+
+
+
+"""Read the Additional File 3 from doi.org/10.1186/s13072-023-00504-8 and link the regions to the nearest gene."""
+
+chip_table = pd.read_table('pathto/rawdata/LDCmouse/Supp.bed', sep='\t', skiprows=1,
+                           header=None)
+chip_regions = BedTool('\n'.join([chip_table[0] + '\t' + chip_table[1].astype(str) + '\t' + chip_table[2].astype(str)][0]), from_string=True)
+
+annotation = 'pathto/rawdata/LDCmouse/gencode.vM21.annotation.gtf.gz'
+gene_tss = GTF_Processing.gene_window_bed(annotation, extend=0, tss_type='5')
+bed_closest = chip_regions.sort().closest(gene_tss.sort(), t='first')
+chip_closest = pd.DataFrame([x.fields for x in bed_closest])
+chip_closest.index = chip_closest[0] + '\t' + chip_closest[1].astype(str) + '\t' + chip_closest[2].astype(str)
+
+# Merge the DataFrames to have the nearest gene in the supplementary table.
+chip_table.index = chip_table[0] + '\t' + chip_table[1].astype(str) + '\t' + chip_table[2].astype(str)
+chip_table = chip_table.join(chip_closest[[3, 4, 5, 6]], how='left', rsuffix='intersect_col')
+chip_table.to_csv('pathto/rawData/LDCmouse/Supp. File 3_closest5TSS.bed',
+                  header=False, index=False, sep='\t')
+
+###################  
 
 Chip_seq = pd.read_csv(
-    'Supp. File 3_closest5TSS.bed', sep='\t', header=None)
+    'pathto/rawdata/LDCmouse/Supp. File 3_closest5TSS.bed', sep='\t', header=None)
 p_corrected = statsmodels.stats.multitest.fdrcorrection(Chip_seq.iloc[:, 5])[1]
 Chip_seq['p_corrected'] = p_corrected
 Chip_seq = Chip_seq[Chip_seq.iloc[:, 21] != '.']
@@ -16,10 +40,10 @@ Chip_seq.drop_duplicates(inplace=True)
 Chip_seq = Chip_seq.groupby(21)['p_corrected'].apply(lambda x: x.min())
 
 Chip_seq.to_csv(
-    './Chip_seq_data_joana_logFC.tsv', sep='\t', header=False)
+    'pathto/rawdata/LDCmouse/Chip_seq_data_joana_logFC.tsv', sep='\t', header=False)
 
 RNA_seq = pd.read_csv(
-    'ShvsCt_deseq2_diff_expressed_genes.txt', sep='\t', index_col=0)
+    'pathto/rawdata/LDCmouse/ShvsCt_deseq2_diff_expressed_genes.txt', sep='\t', index_col=0)
 
 RNA_seq['row'] = RNA_seq['row'].apply(lambda x: x.split('.')[0])
 RNA_seq['abs_log2FC'] = RNA_seq['log2FoldChange'].abs()
@@ -42,7 +66,7 @@ RNA_seq.drop_duplicates(inplace=True)
 RNA_seq.shape
 
 RNA_seq.to_csv(
-    './RNA_seq_data_joana_logFC.tsv', sep='\t', index=False, header=False)
+    'pathto/rawdata/LDCmouse/RNA_seq_data_joana_logFC.tsv', sep='\t', index=False, header=False)
 ####### mapping Entrez ID for rna data
 mg = mygene.MyGeneInfo()
 
@@ -86,4 +110,4 @@ mapping.dropna(inplace=True)
 chip_seq_mapped = Chip_seq.merge(mapping, on='ensembl', how='left')
 
 # Save final table
-chip_seq_mapped.to_csv('./chip_seq_mouse_with_entrez.tsv', sep='\t', index=False)
+chip_seq_mapped.to_csv('pathto/rawdata/LDCmouse/chip_seq_mouse_with_entrez.tsv', sep='\t', index=False)
