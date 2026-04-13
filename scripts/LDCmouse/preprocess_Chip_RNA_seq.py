@@ -9,11 +9,18 @@ import GTF_Processing
 
 
 """Read the Additional File 3 from doi.org/10.1186/s13072-023-00504-8 and link the regions to the nearest gene."""
-
+######## Reading downloaded .bed file from supp paper 
 chip_table = pd.read_table('pathto/rawdata/LDCmouse/Supp.bed', sep='\t', skiprows=1,
                            header=None)
 chip_regions = BedTool('\n'.join([chip_table[0] + '\t' + chip_table[1].astype(str) + '\t' + chip_table[2].astype(str)][0]), from_string=True)
 
+########### 
+# Please download the mouse GENCODE annotation file (vM21) and place it in:
+# pathto/rawdata/LDCmouse/
+# 
+#
+# Update the path below to point to the downloaded file.
+#  
 annotation = 'pathto/rawdata/LDCmouse/gencode.vM21.annotation.gtf.gz'
 gene_tss = GTF_Processing.gene_window_bed(annotation, extend=0, tss_type='5')
 bed_closest = chip_regions.sort().closest(gene_tss.sort(), t='first')
@@ -27,7 +34,6 @@ chip_table.to_csv('pathto/rawData/LDCmouse/Supp. File 3_closest5TSS.bed',
                   header=False, index=False, sep='\t')
 
 ###################  
-
 Chip_seq = pd.read_csv(
     'pathto/rawdata/LDCmouse/Supp. File 3_closest5TSS.bed', sep='\t', header=None)
 p_corrected = statsmodels.stats.multitest.fdrcorrection(Chip_seq.iloc[:, 5])[1]
