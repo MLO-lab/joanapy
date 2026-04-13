@@ -8,3 +8,4 @@ joanapy/__pycache__/
 .DS_Store
 joanapy.egg-info/
 joana_app/
+.Rhistory
