@@ -132,7 +132,7 @@ If you encounter issues while installing or running JOANA, check the following c
 ### 1. run-joana: command not found
 Cause: The package was not installed correctly or the environment is not activated.
 
-### Solution:
+#### Solution:
 
 Ensure your conda environment is activated:
   ```
@@ -151,7 +151,7 @@ Verify installation:
 
 Cause: JOANA depends on Mono, which may not be installed properly.
 
-### Solution:
+#### Solution:
 ```
 conda install -c conda-forge mono
 ```
@@ -175,7 +175,7 @@ Possible causes & fixes:
 
 Cause: Incorrect format or invalid file path.
 
-### Solution:
+#### Solution:
 - Ensure file has .gmt format
 - Verify file path is correct:
   
@@ -188,7 +188,7 @@ Cause: Incorrect format or invalid file path.
 
 Cause: Incorrect file paths.
 
-### Solution:
+#### Solution:
 - Use absolute paths:
   ```
     /home/user/data/file.txt
@@ -203,7 +203,7 @@ Cause:
 - Input data may not meet filtering criteria
 - -m parameter too strict
 
-### Solution:
+#### Solution:
 - Try lowering the -m threshold:
   ```
     -m 0.3
@@ -219,7 +219,7 @@ Symptoms:
 Cause:
 - Incorrect reference file selection
 
-### Solution:
+#### Solution:
 - Ensure -o (primary file) contains more gene measurements than -o2
 - Verify both files share common gene identifiers
 
@@ -227,7 +227,7 @@ Cause:
 
 Cause: No write access to output directory.
 
-### Solution:
+#### Solution:
 - Use a directory you own:
   ```
     mkdir -p ./dirOutputs
@@ -241,7 +241,7 @@ Cause: No write access to output directory.
 
 Cause: Incompatible Python version or missing dependencies.
 
-### Solution:
+#### Solution:
 - Ensure Python 3.11 is used:
   ```
   python --version
