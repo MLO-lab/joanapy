@@ -124,6 +124,15 @@ We provide the scripts used for preprocessing each dataset in the `scripts/` fol
 
 Due to licensing restrictions, we do not redistribute the original datasets.  
 Please download the data from the sources above and run the preprocessing scripts to reproduce the inputs used in JOANA.
+
+## Troubleshooting
+
+If you encounter issues while installing or running JOANA, check the following common problems and solutions:
+
+### Command not found: `run-joana`
+
+
+
 ## Uninstall joanapy
 The package can be uninstalled with the following command:
 
