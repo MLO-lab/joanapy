@@ -129,9 +129,137 @@ Please download the data from the sources above and run the preprocessing script
 
 If you encounter issues while installing or running JOANA, check the following common problems and solutions:
 
-### Command not found: `run-joana`
+### 1. run-joana: command not found
+Cause: The package was not installed correctly or the environment is not activated.
 
+### Solution:
 
+Ensure your conda environment is activated:
+  ```
+  conda activate joana
+  ```
+Reinstall the package:
+  ```
+  pip install .
+  ```
+Verify installation:
+  ```
+  pip list | grep joana
+  ```
+
+### 2. Error related to mono not found
+
+Cause: JOANA depends on Mono, which may not be installed properly.
+
+### Solution:
+```
+conda install -c conda-forge mono
+```
+Then verify:
+  ```
+  mono --version
+  ```
+### 3. Input file format errors
+
+Symptoms:
+- Program crashes or produces unexpected results
+- Errors related to parsing input files
+
+Possible causes & fixes:
+- File contains a header row → Remove the header
+- More than two columns → Keep only first two columns
+- Non-numeric values in column 2 → Ensure all values are numeric
+- Incorrect delimiter → Use .tsv or whitespace-separated .txt
+
+### 4. Pathway file (.gmt) not recognized
+
+Cause: Incorrect format or invalid file path.
+
+### Solution:
+- Ensure file has .gmt format
+- Verify file path is correct:
+  
+  ```
+  ls /path/to/pathway.gmt
+  ```
+- Download valid files from MSigDB or other trusted sources
+
+### 5. File not found errors
+
+Cause: Incorrect file paths.
+
+### Solution:
+- Use absolute paths:
+  ```
+    /home/user/data/file.txt
+  ```
+- Or verify relative paths from your working directory:
+  ```
+    pwd
+  ```
+### 6. Empty or missing output files
+
+Cause:
+- Input data may not meet filtering criteria
+- -m parameter too strict
+
+### Solution:
+- Try lowering the -m threshold:
+  ```
+    -m 0.3
+  ```
+- Ensure sufficient gene coverage in input files
+
+### Issues with multi-omics (-o2)
+
+Symptoms:
+- Unexpected missing data behavior
+- Poor results
+
+Cause:
+- Incorrect reference file selection
+
+### Solution:
+- Ensure -o (primary file) contains more gene measurements than -o2
+- Verify both files share common gene identifiers
+
+### 8. Permission errors when writing output
+
+Cause: No write access to output directory.
+
+### Solution:
+- Use a directory you own:
+  ```
+    mkdir -p ./dirOutputs
+  ```
+- Or change permissions:
+  ```
+    chmod u+w /path/to/output_directory
+  ```
+
+### 9. Python or dependency issues
+
+Cause: Incompatible Python version or missing dependencies.
+
+### Solution:
+- Ensure Python 3.11 is used:
+  ```
+  python --version
+  ```
+- Recreate environment:
+  ```
+  conda remove -n joana --all
+  conda create -n joana python=3.11
+  conda activate joana
+  ```
+### 10. Unexpected crashes or errors
+If you encounter an issue not listed here:
+- Double-check all input formats and parameters
+- Run with minimal example:
+  ```
+  run-joana -o ./sample_data/rna.txt -p ./sample_data/h.all.v6.2.symbols.gmt -d ./dirOutputs/
+  ```
+- Ensure all dependencies are installed
 
 ## Uninstall joanapy
 The package can be uninstalled with the following command:
