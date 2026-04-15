@@ -1,3 +1,7 @@
+# NOTE: Input matrices should contain raw gene-level counts.
+# If not available in processed form, counts must be generated
+# from raw sequencing data prior to running this pipeline.
+
 setwd("pathto/rawData/single_cell/SMM_norm/")
 library(Seurat)
 
