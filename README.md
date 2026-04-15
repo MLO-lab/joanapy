@@ -267,11 +267,11 @@ run-joana -o2 omics2.txt -p h.all.v6.2.symbols.gmt.txt -d ./output
 #### Solution:
 - Always provide the primary omics file using -o:
   ```
-  run-joana -o omics1.txt -o2 omics2.txt -p h.all.v6.2.symbols.gmt.txt -d ./test
+  run-joana -o omics1.txt -o2 omics2.txt -p h.all.v6.2.symbols.gmt.txt -d ./output
   ```
 - For single-omics analysis:
   ```
-  run-joana -o omics2.txt -p h.all.v6.2.symbols.gmt.txt -d ./test
+  run-joana -o omics2.txt -p h.all.v6.2.symbols.gmt.txt -d ./output
   ```
 ### 9. TypeError: expected str, bytes or os.PathLike object, not NoneType
 Cause: Missing required -d (output directory) argument.
