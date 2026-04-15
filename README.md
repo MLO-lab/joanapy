@@ -164,7 +164,7 @@ Then verify:
 Cause: Input file does not follow the required two-column structure.
 #### Common error:
 ```
-  ValueError: Error reading file 'omics1.txt'. Ensure it is a properly formatted two-column file (geneSymbol, q-value) without extra columns.
+ValueError: Error reading file 'omics1.txt'. Ensure it is a properly formatted two-column file (geneSymbol, q-value) without extra columns.
 Original error: Error tokenizing data. C error: Expected 2 fields in line 2, saw 3
 ```
 #### Explanation:
@@ -181,9 +181,9 @@ Original error: Error tokenizing data. C error: Expected 2 fields in line 2, saw
 - Save as .txt or .tsv
 - Correct format example:
   ```
-    A2ML1  0.025202476125022
-    A3GALT2  0.878666355638669
-    A4GALT  0.983155339235838
+  A2ML1  0.025202476125022
+  A3GALT2  0.878666355638669
+  A4GALT  0.983155339235838
   ```
 ### 4. Unsupported file type
 Cause: Input file is not in a supported format (e.g., .csv).
@@ -205,11 +205,11 @@ Cause: Cause: Incorrect file path or missing file (applies to input files and .g
   ```
 - Use absolute paths:
   ```
-    /home/user/data/file.txt
+  /home/user/data/file.txt
   ```
 - Or verify your current working directory for relative paths:
   ```
-    pwd
+  pwd
   ```
 ### 6. Empty output or pandas.errors.EmptyDataError
 
@@ -224,7 +224,7 @@ Cause:
 #### Solution:
 - Try lowering the -m threshold:
   ```
-    -m 0.3
+  -m 0.3
   ```
 - Check that enough genes in your dataset overlap with pathway genes
 - Ensure input files are not empty and properly formatted
@@ -234,7 +234,7 @@ Cause: Incorrect command syntax (using -o1 instead of -o).
 
 #### Common error:
 ```
-  run-joana: error: unrecognized arguments: omics1.txt
+run-joana: error: unrecognized arguments: omics1.txt
 ```
 #### Explanation:
 - The correct flag for the primary omics file is -o, not -o1
@@ -242,28 +242,28 @@ Cause: Incorrect command syntax (using -o1 instead of -o).
 #### Solution:
 - Use the correct command format:
   ```
-    run-joana -o omics1.txt -o2 omics2.txt -p h.all.v6.2.symbols.gmt -d ./test
+  run-joana -o omics1.txt -o2 omics2.txt -p h.all.v6.2.symbols.gmt -d ./output
   ```
 - General syntax:
   ```
-    run-joana -o <omics1.txt> [-o2 <omics2.txt>] -p <pathway.gmt> -d <output_directory>
+  run-joana -o <omics1.txt> [-o2 <omics2.txt>] -p <pathway.gmt> -d <output_directory>
   ```
 ### 8. TypeError: expected str, bytes or os.PathLike object, not NoneType
 Cause: Missing required -d (output directory) argument.
 #### Common error:
 ```
-  TypeError: expected str, bytes or os.PathLike object, not NoneType
+TypeError: expected str, bytes or os.PathLike object, not NoneType
 ```
 
 Example of incorrect command:
 ```
-  run-joana -o omics1.txt -o2 omics2.txt -p h.all.v6.2.symbols.gmt
+run-joana -o omics1.txt -o2 omics2.txt -p h.all.v6.2.symbols.gmt
 ```
 
 #### Solution:
 Always include the -d argument:
 ```
-  run-joana -o omics1.txt -o2 omics2.txt -p h.all.v6.2.symbols.gmt -d ./output
+run-joana -o omics1.txt -o2 omics2.txt -p h.all.v6.2.symbols.gmt -d ./output
 ```
 
 #### Explanation:
@@ -276,11 +276,11 @@ Cause: No write access to output directory.
 #### Solution:
 - Use a directory you own:
   ```
-    mkdir -p ./dirOutputs
+  mkdir -p ./dirOutputs
   ```
 - Or change permissions:
   ```
-    chmod u+w /path/to/output_directory
+  chmod u+w /path/to/output_directory
   ```
 
 ### 10. Python or dependency issues
