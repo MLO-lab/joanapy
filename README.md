@@ -161,69 +161,115 @@ Then verify:
   ```
 ### 3. Input file format errors
 
-Symptoms:
-- Program crashes or produces unexpected results
-- Errors related to parsing input files
-
-Possible causes & fixes:
-- File contains a header row → Remove the header
-- More than two columns → Keep only first two columns
-- Non-numeric values in column 2 → Ensure all values are numeric
-- Incorrect delimiter → Use .tsv or whitespace-separated .txt
-
-### 4. Pathway file (.gmt) not recognized
-
-Cause: Incorrect format or invalid file path.
+Cause: Input file does not follow the required two-column structure.
+#### Common error:
+```
+  ValueError: Error reading file 'omics1.txt'. Ensure it is a properly formatted two-column file (geneSymbol, q-value) without extra columns.
+Original error: Error tokenizing data. C error: Expected 2 fields in line 2, saw 3
+```
+#### Explanation:
+- JOANA expects exactly 2 columns only:
+    1. Gene name
+    2. Numeric score
+- This error usually happens when:
+    A header AND row index are both included → creates a third column
+- Files with only a header or only row names may still work, but both together will cause failure
 
 #### Solution:
-- Ensure file has .gmt format
-- Verify file path is correct:
+- Ensure the file has exactly two columns only
+- Remove any extra index column when exporting (e.g., from Excel or pandas)
+- Save as .txt or .tsv
+- Correct format example:
+  ```
+    A2ML1  0.025202476125022
+    A3GALT2  0.878666355638669
+    A4GALT  0.983155339235838
+  ```
+### 4. Unsupported file type
+Cause: Input file is not in a supported format (e.g., .csv).
+#### Common error:
+```
+Unsupported file type '.csv' for file 'prot1.csv'. Only '.txt' and '.tsv' files are supported
+```
+#### Solution:
+- Convert .csv to .tsv or .txt
   
+### 5. File/path errors (No such file or directory)
+
+Cause: Cause: Incorrect file path or missing file (applies to input files and .gmt pathway file)..
+
+#### Solution:
+- Ensure the file exists and path is correct:
   ```
   ls /path/to/pathway.gmt
   ```
-- Download valid files from MSigDB or other trusted sources
-
-### 5. File not found errors
-
-Cause: Incorrect file paths.
-
-#### Solution:
 - Use absolute paths:
   ```
     /home/user/data/file.txt
   ```
-- Or verify relative paths from your working directory:
+- Or verify your current working directory for relative paths:
   ```
     pwd
   ```
-### 6. Empty or missing output files
+### 6. Empty output or pandas.errors.EmptyDataError
 
 Cause:
-- Input data may not meet filtering criteria
-- -m parameter too strict
+- -m parameter too strict (filters out all pathways)
+- Input data does not meet minimum gene coverage
 
+#### Common error:
+```
+  pandas.errors.EmptyDataError: No columns to parse from file
+```
 #### Solution:
 - Try lowering the -m threshold:
   ```
     -m 0.3
   ```
-- Ensure sufficient gene coverage in input files
+- Check that enough genes in your dataset overlap with pathway genes
+- Ensure input files are not empty and properly formatted
 
-### Issues with multi-omics (-o2)
+### 7. Unrecognized arguments error
+Cause: Incorrect command syntax (using -o1 instead of -o).
 
-Symptoms:
-- Unexpected missing data behavior
-- Poor results
+#### Common error:
+```
+  run-joana: error: unrecognized arguments: omics1.txt
+```
+#### Explanation:
+- The correct flag for the primary omics file is -o, not -o1
+- Using -o1 causes the argument parser to misinterpret the command
+#### Solution:
+- Use the correct command format:
+  ```
+    run-joana -o omics1.txt -o2 omics2.txt -p h.all.v6.2.symbols.gmt -d ./test
+  ```
+- General syntax:
+  ```
+    run-joana -o <omics1.txt> [-o2 <omics2.txt>] -p <pathway.gmt> -d <output_directory>
+  ```
+### 8. TypeError: expected str, bytes or os.PathLike object, not NoneType
+Cause: Missing required -d (output directory) argument.
+#### Common error:
+```
+  TypeError: expected str, bytes or os.PathLike object, not NoneType
+```
 
-Cause:
-- Incorrect reference file selection
+Example of incorrect command:
+```
+  run-joana -o omics1.txt -o2 omics2.txt -p h.all.v6.2.symbols.gmt
+```
 
 #### Solution:
-- Ensure -o (primary file) contains more gene measurements than -o2
-- Verify both files share common gene identifiers
+Always include the -d argument:
+```
+  run-joana -o omics1.txt -o2 omics2.txt -p h.all.v6.2.symbols.gmt -d ./output
+```
 
-### 8. Permission errors when writing output
+#### Explanation:
+- The -d parameter (output directory) is required
+- If -d is not provided, JOANA receives None instead of a path, causing this error
+### 9. Permission errors when writing output
 
 Cause: No write access to output directory.
 
@@ -237,7 +283,7 @@ Cause: No write access to output directory.
     chmod u+w /path/to/output_directory
   ```
 
-### 9. Python or dependency issues
+### 10. Python or dependency issues
 
 Cause: Incompatible Python version or missing dependencies.
 
@@ -252,7 +298,7 @@ Cause: Incompatible Python version or missing dependencies.
   conda create -n joana python=3.11
   conda activate joana
   ```
-### 10. Unexpected crashes or errors
+### 11. Unexpected crashes or errors
 If you encounter an issue not listed here:
 - Double-check all input formats and parameters
 - Run with minimal example:
