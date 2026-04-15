@@ -248,8 +248,34 @@ run-joana: error: unrecognized arguments: omics1.txt
   ```
   run-joana -o <omics1.txt> [-o2 <omics2.txt>] -p <pathway.gmt> -d <output_directory>
   ```
-### 8. TypeError: expected str, bytes or os.PathLike object, not NoneType
+### 8. Missing primary omics file (-o)
+Cause: The required -o argument is missing.
+#### Common error:
+```
+TypeError: expected str, bytes or os.PathLike object, not NoneType
+```
+#### Explanation:
+- The -o parameter (primary omics file) is mandatory
+- Running JOANA with only -o2 is invalid
+- Internally, JOANA tries to process -o, but receives None, causing this error
+
+Example of incorrect command:
+```
+run-joana -o2 omics2.txt -p h.all.v6.2.symbols.gmt.txt -d ./output
+```
+
+#### Solution:
+- Always provide the primary omics file using -o:
+  ```
+  run-joana -o omics1.txt -o2 omics2.txt -p h.all.v6.2.symbols.gmt.txt -d ./test
+  ```
+- For single-omics analysis:
+  ```
+  run-joana -o omics2.txt -p h.all.v6.2.symbols.gmt.txt -d ./test
+  ```
+### 9. TypeError: expected str, bytes or os.PathLike object, not NoneType
 Cause: Missing required -d (output directory) argument.
+
 #### Common error:
 ```
 TypeError: expected str, bytes or os.PathLike object, not NoneType
@@ -269,7 +295,7 @@ run-joana -o omics1.txt -o2 omics2.txt -p h.all.v6.2.symbols.gmt -d ./output
 #### Explanation:
 - The -d parameter (output directory) is required
 - If -d is not provided, JOANA receives None instead of a path, causing this error
-### 9. Permission errors when writing output
+### 10. Permission errors when writing output
 
 Cause: No write access to output directory.
 
@@ -283,7 +309,7 @@ Cause: No write access to output directory.
   chmod u+w /path/to/output_directory
   ```
 
-### 10. Python or dependency issues
+### 11. Python or dependency issues
 
 Cause: Incompatible Python version or missing dependencies.
 
@@ -298,7 +324,7 @@ Cause: Incompatible Python version or missing dependencies.
   conda create -n joana python=3.11
   conda activate joana
   ```
-### 11. Unexpected crashes or errors
+### 12. Unexpected crashes or errors
 If you encounter an issue not listed here:
 - Double-check all input formats and parameters
 - Run with minimal example:
